@@ -85,6 +85,7 @@
                     <thead>
                       <tr>
                       <th>ID</th>
+                        <th>Khu vực</th>
                         <th>Title</th>
                         <th>Excerpt</th>
                         <th>Category</th>
@@ -103,6 +104,7 @@
                     <tfoot>
                     <tr>
                         <th>ID</th>
+                        <th>Khu vực</th>
                         <th>Title</th>
                         <th>Excerpt</th>
                         <th>Category</th>
@@ -122,6 +124,9 @@
 <?php foreach($list_post as $item): ?>
     <tr>
         <td><?= htmlspecialchars($item["id"]) ?></td>
+        <td>
+          <?= htmlspecialchars($item["area"])==1?"Ngoài nước":"Trong nước" ?>
+        </td>
         <td><?= htmlspecialchars($item["title"]) ?></td>
         <td><?= htmlspecialchars($item["excerpt"]) ?></td>
         <td><?= htmlspecialchars($item["category_name"]) ?></td>

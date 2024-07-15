@@ -1,52 +1,59 @@
 <?php
+// CLIENT
+session_start();
+
 require_once './Commons/env.php';
 require_once './Commons/helper.php';
 require_once './Commons/connectDB.php';
 require_once './Commons/crud-db.php';
 
-require_file(PATH_CONTROLLER);
-require_file(PATH_MODEL);
+require_file(PATH_CONTROLLER_CLIENT);
+require_file(PATH_MODEL_CLIENT);
 
+$act = isset($_GET["act"]) ? $_GET["act"] : '';
 
-$data = [
-    'full_name' => 'Nguyễn Minh Ngọc',
-    'email' => 'abc@gmail.com',
-    'sdt' => '0981726417',
-    'password_user' => '123456',
-];
+// $act = isset($_GET["act"]) ? $_GET["act"] : '';
 
-$data_update = [
-    'full_name' => 'Nguyễn Minh Ngọc',
-    'email' => 'hakai@gmail.com',
-    'sdt' => '0981726417',
-    'password_user' => '123456',
-];
-
-//insert($conn,'users',$data);
-//update($conn,'users',$data_update,15);
-// $x = getItemByID($conn,"users",9);
-// if($x== null){
-//     echo"null";
-// }else{
-//     debug($x);
+// if (!isset($_SESSION["user"]) || empty($_SESSION["user"])) {
+//     if ($act !== 'login') {
+//         header('Location: index.php?act=login');
+//         exit(); 
+//     }
 // }
 
 // Điều hướng URL
-$act = isset($_GET["act"]) ? $_GET["act"] : '';
-
 switch ($act) {
-    case 'rigister':
-      
-        registerIndex();
+    case 'register':
+        create_user($conn);
         break;
     case 'login':
-        loginIndex();
+        LoginForm_user($conn);
         break;
-    // Thêm các case khác tùy theo nhu cầu của bạn
+    case 'logout':
+        LogOut();
+        break;
+    case 'single-post':
+        if (isset($_GET['post-id'])) {
+            manage_post_view($conn, $_GET['post-id']);
+            // getUserDetail($conn, $_GET['post-id']);
+        } else {
+            echo "Không có thông tin chi tiết người dùng vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_CLIENT. '404.php';
+        }
+        break;
+    // case 'login':
+    //     LoginForm_user($conn);
+    //     break;
+    // case 'logout':
+    //     LogOut();
+    //     break;
+    
+    case 'test':
+        TestIndex($conn);
+        break;
     default:
-    HomeIndex();
+    HomeIndex($conn);
         break;
 }
-
 require_once './Commons/disconnect_db.php';
-
+?>

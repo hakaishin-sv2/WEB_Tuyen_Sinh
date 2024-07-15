@@ -74,7 +74,7 @@
                     <td>Trường dữ liệu</td>
                     <td>Dữ liệu</td>
                 </tr>
-                <?php $post_dto_item = get_Post_detail($conn, $id); ?>
+                <?php  $post_dto_item = get_Post_detail($conn, $id);?>
 <?php if (!empty($post_dto_item)): ?>
     <tr>
         <td>ID</td>
@@ -90,7 +90,9 @@
     </tr>
     <tr>
         <td>Content</td>
-        <td><?php echo htmlspecialchars($post_dto_item['content']); ?></td>
+        <td><?php $contentFromDB =$post_dto_item['content'];
+        $content= htmlspecialchars_decode($contentFromDB);
+         echo$content; ?></td>
     </tr>
     <tr>
         <td>Category</td>

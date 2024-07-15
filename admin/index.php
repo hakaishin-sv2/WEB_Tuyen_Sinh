@@ -9,9 +9,18 @@ require_once '../Commons/crud-db.php';
 require_file(PATH_CONTROLLER_ADMIN);
 require_file(PATH_MODEL_ADMIN);
 
-// Điều hướng URL
+// Kiểm tra xem người dùng đã đăng nhập chưa
 $act = isset($_GET["act"]) ? $_GET["act"] : '';
 
+if (!isset($_SESSION["user"]) || empty($_SESSION["user"]) || (isset($_SESSION["user"]["role"]) && $_SESSION["user"]["role"] == 0)) {
+    // Nếu người dùng chưa đăng nhập, có session user role = 0 và không phải đang truy cập trang login, chuyển hướng đến trang login
+    if ($act !== 'login') {
+        header('Location: index.php?act=login');
+        exit(); 
+    }
+}
+
+// Điều hướng URL
 switch ($act) {
     case 'rigister':
         break;
@@ -212,6 +221,5 @@ switch ($act) {
     MainIndex();
         break;
 }
-
 require_once '../Commons/disconnect_db.php';
-
+?>

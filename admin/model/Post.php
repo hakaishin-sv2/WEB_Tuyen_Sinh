@@ -45,6 +45,12 @@ function validate_Create_Post($data) {
         $errors[] = "Ảnh nhỏ không hợp lệ.";
     }
 
+// Kiểm tra area
+    // if (!in_array($data['area'], [0, 1]) ) {
+    //     $errors[] = "Bạn cần chọn khu vực tin là 'Tin trong nước' hoặc 'Tin ngoài nước'.";
+    // }
+
+
     // // Kiểm tra cover image
     // if (isset($_FILES['imgcover']) && $_FILES['imgcover']['error'] == 0) {
     //     $allowed_types = ['image/jpeg', 'image/png', 'image/gif'];
@@ -63,6 +69,7 @@ function getList_DTO_post($conn) {
     SELECT 
         p.id,
         p.title,
+        p.area,
         p.excerpt,
         c.name_category AS category_name,
         u.full_name AS author_name,
@@ -104,6 +111,7 @@ function get_Post_detail($conn, $id) {
     SELECT 
         p.id,
         p.title,
+        p.area,
         p.excerpt,
         p.content,
         c.name_category AS category_name,

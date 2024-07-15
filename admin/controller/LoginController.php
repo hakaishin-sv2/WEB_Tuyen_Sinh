@@ -34,11 +34,5 @@ function LoginForm($conn) {
     require_once PATH_VIEW_ADMIN . 'login.php'; // Nếu là GET request hoặc không có dữ liệu POST, hiển thị form login
 }
 
-function LogOut(){
-unset($_SESSION['user']);
-header('Location: index.php?act=login');
-exit();
-}
-
 
 

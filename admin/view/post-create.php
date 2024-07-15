@@ -85,8 +85,9 @@
 
                 <div class="container mt-5">
                 <h2>Thêm bài viết mới</h2>
+                <br>
                 <form action="" method="POST" enctype="multipart/form-data">
-    <div class="row">
+        <div class="row">
         <div class="col-md-6">
             <div class="form-group">
                 <label for="title">Title:</label>
@@ -105,13 +106,26 @@
                 </select>
             </div>
             <div class="form-group">
+              <p style="color:red; font-size: 15px ">Nếu thuộc tin về bóng đá hãy chọn là Trong nước hay ngoài nước</p>
+                <label>Tin tức</label><br>
+                <input type="radio" id="is_domestic" name="news_type" value="domestic"
+                    <?= isset($_SESSION['data_err']['news_type']) && $_SESSION['data_err']['news_type'] == 'domestic' ? 'checked' : '' ?>
+                    style="margin-right: 10px;">
+                <label for="is_domestic" style="margin-right: 20px;">Tin trong nước</label>
+                
+                <input type="radio" id="is_foreign" name="news_type" value="foreign"
+                    <?= isset($_SESSION['data_err']['news_type']) && $_SESSION['data_err']['news_type'] == 'foreign' ? 'checked' : '' ?>
+                    style="margin-right: 10px;">
+                <label for="is_foreign" style="margin-right: 20px;">Tin ngoài nước</label>
+            </div>
+            <div class="form-group">
                 <label for="excerpt">excerpt:</label>
                 <textarea class="form-control" id="excerpt" name="excerpt" rows="3"  placeholder="Mô tả ngắn bài viết"><?= isset($_SESSION['data_err']['excerpt']) ? htmlspecialchars($_SESSION['data_err']['excerpt'], ENT_QUOTES, 'UTF-8') : '' ?></textarea>
             </div>
             <div class="form-group">
                 <label for="tags"> Thẻ Tag:</label>
                 <select name="tags[]" id="tags" class="form-control" multiple>
-                    <?php foreach($tags as $tag): ?>
+                    <?php print_r($_SESSION['data_err']); foreach($tags as $tag): ?>
                         <option value="<?= $tag['id'] ?>" <?= isset($_SESSION['data_err']['tags']) && in_array($tag['id'], $_SESSION['data_err']['tags']) ? 'selected' : '' ?>>
                             <?= $tag['name_tag'] ?>
                         </option>

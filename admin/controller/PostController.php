@@ -1,32 +1,42 @@
 <?php
-function getAlllistPost($conn){
+function getAlllistPost($conn)
+{
     $list_post = getList_DTO_post($conn);
-    require_once PATH_VIEW_ADMIN. 'post-manager.php';
+    require_once PATH_VIEW_ADMIN . 'post-manager.php';
 }
 
-function get_Postd_item($conn,$id){
-    $post_dto_item = get_Post_detail($conn,$id);
-    if($post_dto_item==null || empty($post_dto_item)){
-        require_once PATH_VIEW_ADMIN. '404.php';
+function get_Postd_item($conn, $id)
+{
+    $post_dto_item = get_Post_detail($conn, $id);
+    if ($post_dto_item == null || empty($post_dto_item)) {
+        require_once PATH_VIEW_ADMIN . '404.php';
     }
-    require_once PATH_VIEW_ADMIN. 'post-detail.php';
+    require_once PATH_VIEW_ADMIN . 'post-detail.php';
 }
 
-function PostCreate($conn) {
+function PostCreate($conn)
+{
     // Bắt đầu transaction
-    mysqli_begin_transaction($conn);
 
+    mysqli_begin_transaction($conn);
     try {
         $categories = getListTable($conn, "categories");
         $tags = getListTable($conn, "tags");
         if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST)) {
-           
             $title = mysqli_real_escape_string($conn, $_POST["title"]);
             $category_id = (int) mysqli_real_escape_string($conn, $_POST["select_category"]);
             $excerpt = mysqli_real_escape_string($conn, $_POST["excerpt"]);
             $status = (int) mysqli_real_escape_string($conn, $_POST["status"]);
             $is_trending = (int) mysqli_real_escape_string($conn, $_POST["is_trending"]);
-            $content = mysqli_real_escape_string($conn, $_POST["content"]);
+            $content =  $_POST["content"];
+            if ($_POST["news_type"] == 'foreign') {
+                $area = 1;
+            } elseif ($_POST["news_type"] == 'domestic') {
+                $area = 0;
+            } else {
+                $area = 10;
+            }
+
             $author_id = $_SESSION["user"]["id"];
             $data = [
                 'title' => $title ?? null,
@@ -38,6 +48,7 @@ function PostCreate($conn) {
                 'content' => $content ?? null,
                 'img_thumbnail' => null,
                 'img_cover' => null,
+                'area' => $area,
             ];
 
             // Xử lý upload thumbnail
@@ -54,8 +65,8 @@ function PostCreate($conn) {
                 $data['img_cover'] = $result;
             }
 
-            // Validate dữ liệu
-           // $errors = validate_Create_Post($data);
+            //  Validate dữ liệu
+            $errors = validate_Create_Post($data);
             if (!empty($errors)) {
                 $_SESSION['errors'] = $errors;
                 $_SESSION['data_err'] = $data;
@@ -90,20 +101,23 @@ function PostCreate($conn) {
     } catch (Exception $e) {
         // Rollback transaction nếu có lỗi
         mysqli_rollback($conn);
-        $_SESSION['errors'] = ['message' => 'Đã xảy ra lỗi khi tạo bài viết. Vui lòng thử lại sau.'];
+        // Ghi chi tiết lỗi vào session
+        $_SESSION['errors'] = ['message' => 'Đã xảy ra lỗi khi tạo bài viết. Vui lòng thử lại sau.', 'error_detail' => $e->getMessage()];
         header('Location: index.php?act=post-create');
         exit();
     }
 }
 
 
-function PostUpdate($conn, $id) {
-    
+
+function PostUpdate($conn, $id)
+{
+
     $post_item = getItemByID($conn, "posts", $id);;
     $categories = getListTable($conn, "categories");
     $tags = getListTable($conn, "tags");
     $post_tags = getTagsByPostID($conn, $id);
-    
+
     if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST)) {
         try {
             mysqli_begin_transaction($conn);
@@ -112,8 +126,14 @@ function PostUpdate($conn, $id) {
             $excerpt = mysqli_real_escape_string($conn, $_POST["excerpt"]);
             $status = (int) mysqli_real_escape_string($conn, $_POST["status"]);
             $is_trending = (int) mysqli_real_escape_string($conn, $_POST["is_trending"]);
-            $content = mysqli_real_escape_string($conn, $_POST["content"]);
-
+            $content = $_POST["content"];
+            if ($_POST["news_type"] == 'foreign') {
+                $area = 1;
+            } elseif ($_POST["news_type"] == 'domestic') {
+                $area = 0;
+            } else {
+                $area = 10;
+            }
             // Dữ liệu cũ của bài viết
             $data = [
                 'title' => $title ?? $post_item["title"],
@@ -122,7 +142,8 @@ function PostUpdate($conn, $id) {
                 'status' => $status ?? $post_item["status"],
                 'is_trending' => $is_trending ?? $post_item["is_trending"],
                 'content' => $content ?? $post_item["content"],
-                'updated_at' => date('Y-m-d H:i:s')
+                'updated_at' => date('Y-m-d H:i:s'),
+                'area' => $area ?? $post_item["area"],
             ];
 
             // Xử lý upload ảnh thumbnail nếu có
@@ -187,11 +208,12 @@ function PostUpdate($conn, $id) {
 }
 
 
-function deletePost($conn, $post_id) {
+function deletePost($conn, $post_id)
+{
     mysqli_begin_transaction($conn);
-   
+
     $post_item = getItemByID($conn, "posts", $post_id);
-   
+
     try {
         // Xóa các bản ghi liên quan từ bảng post_tag
         $stmt = $conn->prepare("DELETE FROM post_tag WHERE post_id = ?");
@@ -209,7 +231,7 @@ function deletePost($conn, $post_id) {
         // Kiểm tra và xóa file ảnh thumbnail
         if (!empty($post_item)) {
             deleteFile($post_item['img_thumbnail']);
-            
+
             // Kiểm tra và xóa file ảnh cover nếu nó không rỗng
             if (!empty($post_item["img_cover"])) {
                 deleteFile($post_item["img_cover"]);
@@ -233,9 +255,10 @@ function deletePost($conn, $post_id) {
 }
 
 
-function Phe_duyet_Post($conn, $id) {
-    $post_item = getItemByID($conn,"posts",$id);
-    $post_item["status"]=1;
+function Phe_duyet_Post($conn, $id)
+{
+    $post_item = getItemByID($conn, "posts", $id);
+    $post_item["status"] = 1;
     update($conn, "posts", $post_item, $id);
     $_SESSION['success'] = "Phê duyệt bài viết thành công";
     header('Location: index.php?act=posts');
