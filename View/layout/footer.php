@@ -16,25 +16,31 @@
         <div class="col-6 col-lg-2">
           <h3 class="footer-heading">Navigation</h3>
           <ul class="footer-links list-unstyled">
-            <li><a href="index.html"><i class="bi bi-chevron-right"></i> Home</a></li>
-            <li><a href="index.html"><i class="bi bi-chevron-right"></i> Blog</a></li>
+            <li><a href="index.php"><i class="bi bi-chevron-right"></i> Tin Tức</a></li>
+            <!-- <li><a href="index.html"><i class="bi bi-chevron-right"></i> Blog</a></li> -->
             <li><a href="category.html"><i class="bi bi-chevron-right"></i> Categories</a></li>
-            <li><a href="single-post.html"><i class="bi bi-chevron-right"></i> Single Post</a></li>
-            <li><a href="about.html"><i class="bi bi-chevron-right"></i> About us</a></li>
-            <li><a href="contact.html"><i class="bi bi-chevron-right"></i> Contact</a></li>
+            <!-- <li><a href="single-post.html"><i class="bi bi-chevron-right"></i> Single Post</a></li> -->
+            <li><a href="about.php"><i class="bi bi-chevron-right"></i> About</a></li>
+            <li><a href="contact.php"><i class="bi bi-chevron-right"></i> Contact</a></li>
           </ul>
         </div>
         <div class="col-6 col-lg-2">
           <h3 class="footer-heading">Categories</h3>
           <ul class="footer-links list-unstyled">
-            <li><a href="category.html"><i class="bi bi-chevron-right"></i> Business</a></li>
-            <li><a href="category.html"><i class="bi bi-chevron-right"></i> Culture</a></li>
-            <li><a href="category.html"><i class="bi bi-chevron-right"></i> Sport</a></li>
-            <li><a href="category.html"><i class="bi bi-chevron-right"></i> Food</a></li>
-            <li><a href="category.html"><i class="bi bi-chevron-right"></i> Politics</a></li>
-            <li><a href="category.html"><i class="bi bi-chevron-right"></i> Celebrity</a></li>
-            <li><a href="category.html"><i class="bi bi-chevron-right"></i> Startups</a></li>
-            <li><a href="category.html"><i class="bi bi-chevron-right"></i> Travel</a></li>
+            <?php $categories = get_all_categories($conn);  ?>
+            <?php
+            if ($categories) {
+              foreach ($categories as $category) {
+                // Lấy thông tin từ biến $category
+                $category_id = htmlspecialchars($category['id'], ENT_QUOTES, 'UTF-8');
+                $category_name = htmlspecialchars($category['name_category'], ENT_QUOTES, 'UTF-8');
+
+                echo '<li><a href="index.php?act=category&id=' . $category_id . '"><i class="bi bi-chevron-right"></i> ' . $category_name . '</a></li>';
+              }
+            } else {
+              echo '<li><a href="#"><i class="bi bi-chevron-right"></i> Không có danh mục nào</a></li>';
+            }
+            ?>
 
           </ul>
         </div>
@@ -44,6 +50,7 @@
 
           <ul class="footer-links footer-blog-entry list-unstyled">
             <?php
+            $top6_post_new      = get_top6_new_post($conn);
             for ($i = 0; $i < 5; $i++) {
               $post = $top6_post_new[$i]; // Lấy dữ liệu từ mảng $top6_post_new
             ?>

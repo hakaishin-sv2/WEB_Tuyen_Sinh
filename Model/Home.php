@@ -1,4 +1,20 @@
 <?php
+function get_all_categories($conn)
+{
+    $query = "SELECT id, name_category FROM categories";
+
+    $result = $conn->query($query);
+    if (!$result) {
+        die("Error executing query: " . $conn->error);
+    }
+
+    $categories = [];
+    while ($row = $result->fetch_assoc()) {
+        $categories[] = $row;
+    }
+
+    return $categories;
+}
 // // Hàm cập nhật view_count và đánh dấu post_id đã được xem
 function manage_post_view($conn, $post_id)
 {
