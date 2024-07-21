@@ -18,10 +18,10 @@
           <ul class="footer-links list-unstyled">
             <li><a href="index.php"><i class="bi bi-chevron-right"></i> Tin Tức</a></li>
             <!-- <li><a href="index.html"><i class="bi bi-chevron-right"></i> Blog</a></li> -->
-            <li><a href="category.html"><i class="bi bi-chevron-right"></i> Categories</a></li>
+            <li><a href="#"><i class="bi bi-chevron-right"></i> Categories</a></li>
             <!-- <li><a href="single-post.html"><i class="bi bi-chevron-right"></i> Single Post</a></li> -->
-            <li><a href="about.php"><i class="bi bi-chevron-right"></i> About</a></li>
-            <li><a href="contact.php"><i class="bi bi-chevron-right"></i> Contact</a></li>
+            <li><a href="index.php?actabout.php"><i class="bi bi-chevron-right"></i> About</a></li>
+            <li><a href="index.php?act=contact.php"><i class="bi bi-chevron-right"></i> Contact</a></li>
           </ul>
         </div>
         <div class="col-6 col-lg-2">

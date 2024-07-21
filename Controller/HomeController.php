@@ -1,6 +1,9 @@
 <?php
 function HomeIndex($conn)
 {
+    // banner
+    $banner_post = get_top_6_posts_recent_and_most_viewed($conn);
+
     $post_view_caonhat  = get_post_view_biggest($conn);
     $top6_post_new      = get_top6_new_post($conn);
     $top5_trending      = get_top5_trending_posts($conn);

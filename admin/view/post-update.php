@@ -125,7 +125,7 @@
                         <small class="form-text text-muted">Chọn một file ảnh cho bài viết.</small>
                       </div>
                       <div class="form-group">
-                        <label for="select_category">is_trending:</label>
+                        <label for="select_category">Trạng thái bài viết:</label>
                         <select name="status" id="status" class="form-control" required>
                           <option value="1" <?= $post_item['status'] == 1 ? 'selected' : '' ?>>Public Post</option>
                           <option value="0" <?= $post_item['status'] == 0 ? 'selected' : '' ?>>Chưa duyệt</option>

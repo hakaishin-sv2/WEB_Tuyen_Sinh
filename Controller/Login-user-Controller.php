@@ -1,5 +1,6 @@
 <?php
-function LoginForm_user($conn) {
+function LoginForm_user($conn)
+{
     if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST)) {
         $email = mysqli_real_escape_string($conn, $_POST["email"]);
         $password = mysqli_real_escape_string($conn, $_POST["password"]);
@@ -7,7 +8,7 @@ function LoginForm_user($conn) {
             'email' => $email,
             'password' => $password,
         ];
-        $errors = validate_form_Login($data); 
+        $errors = validate_form_Login($data);
 
         // Kiểm tra đăng nhập
         $user_login = get_dataTable_users_by_email($conn, $email);
@@ -21,20 +22,14 @@ function LoginForm_user($conn) {
             exit();
         }
         $_SESSION['user'] = $user_login;
-        if($user_login["role"]==1){
+        if ($user_login["role"] == 1) {
             header('Location: ' . BASE_URL_ADMIN);
             exit();
-        }else{
+        } else {
             header('Location: ' . BASE_URL_CLIENT);
             exit();
         }
-       
     }
 
-    require_once PATH_VIEW_CLIENT . 'login-user.php'; // Nếu là GET request hoặc không có dữ liệu POST, hiển thị form login
+    require_once PATH_VIEW_CLIENT . 'login-user.php';
 }
-
-
-
-
-

@@ -1,10 +1,11 @@
 <?php
-function validate_Create_Author($data, $file) {
+function validate_Create_Author($data, $file)
+{
     $errors = [];
     if (empty($data["user_id"])) {
         $errors[] = "Cần nhập chọn tác giả";
     }
-    if (!empty($data["Tieusu"]) && strlen($data["Tieusu"]) > 250) {
+    if (!empty($data["Tieusu"]) && strlen($data["Tieusu"]) > 500) {
         $errors[] = "Tiểu sử tác giả ghi ngắn thôi";
     }
     if (isset($file) && $file['error'] == UPLOAD_ERR_OK) {
@@ -23,13 +24,14 @@ function validate_Create_Author($data, $file) {
         if ($file['size'] > $maxFileSize) {
             $errors[] = "Kích thước file tải lên không được vượt quá 2MB!";
         }
-    } 
+    }
 
     return $errors;
 }
 
-function getListAuThor_Dto($conn){
-    $sql= "SELECT authors.*, users.full_name, users.email
+function getListAuThor_Dto($conn)
+{
+    $sql = "SELECT authors.*, users.full_name, users.email
             FROM authors
             JOIN users ON authors.user_id = users.id";
 
@@ -54,12 +56,13 @@ function getListAuThor_Dto($conn){
     }
 }
 
-function getAuThor_Dto_byID($conn, $id) {
+function getAuThor_Dto_byID($conn, $id)
+{
     $sql = "SELECT authors.*, users.full_name, users.email
             FROM authors
             JOIN users ON authors.user_id = users.id
             WHERE authors.id = ?";
-    
+
     $stmt = mysqli_prepare($conn, $sql);
     if ($stmt === false) {
         return null;
@@ -70,8 +73,8 @@ function getAuThor_Dto_byID($conn, $id) {
     $result = mysqli_stmt_get_result($stmt);
 
     if ($result && mysqli_num_rows($result) > 0) {
-        $author_item = mysqli_fetch_assoc($result); 
-        
+        $author_item = mysqli_fetch_assoc($result);
+
         mysqli_stmt_close($stmt);
         return $author_item;
     } else {
@@ -79,9 +82,3 @@ function getAuThor_Dto_byID($conn, $id) {
         return null;
     }
 }
-
-
-
-  
- 
-

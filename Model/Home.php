@@ -34,6 +34,47 @@ function manage_post_view($conn, $post_id)
 
 
 // Banner
+function get_top_6_posts_recent_and_most_viewed($conn)
+{
+    // Lấy ngày hiện tại và ngày 7 ngày trước
+    $currentDate = date('Y-m-d');
+    $sevenDaysAgo = date('Y-m-d', strtotime('-7 days'));
+
+    // Câu lệnh SQL để lấy 6 bài viết mới nhất và có nhiều lượt xem nhất trong 7 ngày gần nhất
+    $query = "
+        SELECT 
+            p.id,
+            p.title,
+            p.excerpt,
+            p.content,
+            p.img_thumbnail,
+            p.created_at,
+            p.views_count
+        FROM 
+            posts p
+        WHERE 
+            p.created_at BETWEEN ? AND ?
+        ORDER BY 
+            p.views_count DESC, p.created_at DESC
+        LIMIT 6
+    ";
+
+    $stmt = $conn->prepare($query);
+    if (!$stmt) {
+        die("Error preparing statement: " . $conn->error);
+    }
+
+    $stmt->bind_param('ss', $sevenDaysAgo, $currentDate);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if (!$result) {
+        die("Error executing statement: " . $stmt->error);
+    }
+    $posts = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
+
+    return $posts;
+}
 
 // Các bài viết tiêu điểm
 function get_post_view_biggest($conn)

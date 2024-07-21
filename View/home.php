@@ -71,7 +71,9 @@
   <!-- ======= Footer ======= -->
   <?php require_once PATH_VIEW_CLIENT . "/layout/footer.php";  ?>
   <!-- ======== END Footer=== -->
-
+  <form action="" method="post">
+    <input type="submit" name="hehe">
+  </form>
   <a href="#" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
   <!-- Vendor JS Files -->

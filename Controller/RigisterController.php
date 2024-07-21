@@ -1,27 +1,30 @@
 <?php
-function user_detail($conn,$id){
-    $user_item = getItemByID($conn,"users",$id);
-    if($user_item==null || empty($user_item)){
-        require_once PATH_VIEW_ADMIN. '404.php';
+function user_detail($conn, $id)
+{
+    $user_item = getItemByID($conn, "users", $id);
+    if ($user_item == null || empty($user_item)) {
+        require_once PATH_VIEW_ADMIN . '404.php';
     }
     //require_once PATH_VIEW_ADMIN. 'user-detail.php';
 }
-function create_user($conn) {
+function create_user($conn)
+{
     try {
-        if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST)) { 
-            echo"huhuhu";
+        if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST)) {
+            echo "huhuhu";
             $email = mysqli_real_escape_string($conn, $_POST["email"]);
             $full_name = mysqli_real_escape_string($conn, $_POST["full_name"]);
             $hashpassword = password_hash(mysqli_real_escape_string($conn, $_POST["password"]), PASSWORD_DEFAULT); // Mã hóa mật khẩu
-            $role = 0; 
+            $role = 0;
             $password = isset($_POST['password']) ? $_POST['password'] : '';
             $repeat_password = $_POST["repeat_password"];
             $data = [
                 'email' => $email,
                 'full_name' => $full_name,
                 'password' => $password,
-                'hashpassword'=>$hashpassword,
+                'hashpassword' => $hashpassword,
                 'role' => $role,
+                'img_user' => "/uploads/img_users/user-no-avatar.jpg"
             ];
             $errors = validate_Create_User($data, $conn);
             if ($password !== $repeat_password) {
@@ -45,7 +48,8 @@ function create_user($conn) {
     }
 }
 
-function update_user($conn, $id) {
+function update_user($conn, $id)
+{
     $user_item = getItemByID($conn, "users", $id);
 
     // Kiểm tra phương thức request là POST và không rỗng
@@ -73,6 +77,3 @@ function update_user($conn, $id) {
     }
     require_once PATH_VIEW_ADMIN . 'user-update.php';
 }
-
-
-

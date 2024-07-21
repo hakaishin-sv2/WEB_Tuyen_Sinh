@@ -29,6 +29,7 @@ function PostCreate($conn)
             $status = (int) mysqli_real_escape_string($conn, $_POST["status"]);
             $is_trending = (int) mysqli_real_escape_string($conn, $_POST["is_trending"]);
             $content =  $_POST["content"];
+            $pheduyet_by = $_SESSION["user"]["id"];
             if ($_POST["news_type"] == 'foreign') {
                 $area = 1;
             } elseif ($_POST["news_type"] == 'domestic') {
@@ -48,6 +49,7 @@ function PostCreate($conn)
                 'content' => $content ?? null,
                 'img_thumbnail' => null,
                 'img_cover' => null,
+                'pheduyet_by' => $pheduyet_by,
                 'area' => $area,
             ];
 

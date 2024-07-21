@@ -1,5 +1,6 @@
 <?php
-function validate_Create_Post($data) {
+function validate_Create_Post($data)
+{
     $errors = [];
 
     // Kiểm tra tiêu đề
@@ -42,10 +43,10 @@ function validate_Create_Post($data) {
             $errors[] = "Ảnh nhỏ phải có định dạng jpeg, png .";
         }
     } else {
-        $errors[] = "Ảnh nhỏ không hợp lệ.";
+        $errors[] = "Bắt buộc tải 1 ảnh cho bài viết ở mục ảnh nhỏ";
     }
 
-// Kiểm tra area
+    // Kiểm tra area
     // if (!in_array($data['area'], [0, 1]) ) {
     //     $errors[] = "Bạn cần chọn khu vực tin là 'Tin trong nước' hoặc 'Tin ngoài nước'.";
     // }
@@ -64,7 +65,8 @@ function validate_Create_Post($data) {
     return $errors;
 }
 
-function getList_DTO_post($conn) {
+function getList_DTO_post($conn)
+{
     $query = "
     SELECT 
         p.id,
@@ -74,6 +76,7 @@ function getList_DTO_post($conn) {
         c.name_category AS category_name,
         u.full_name AS author_name,
         u.email AS author_email,
+        u.role,
         p.img_thumbnail,
         p.img_cover,
         p.status,
@@ -106,7 +109,8 @@ function getList_DTO_post($conn) {
         return [];
     }
 }
-function get_Post_detail($conn, $id) {
+function get_Post_detail($conn, $id)
+{
     $query = "
     SELECT 
         p.id,
@@ -158,7 +162,8 @@ function get_Post_detail($conn, $id) {
     }
 }
 
-function getTagsByPostID($conn, $post_id) {
+function getTagsByPostID($conn, $post_id)
+{
     $tags = [];
 
     // Query để lấy các tag của post_id từ bảng post_tag
