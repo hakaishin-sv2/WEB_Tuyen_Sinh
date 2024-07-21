@@ -19,6 +19,9 @@
 
   <!-- Custom styles for this page -->
   <link href="View/dashboard_client/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
+  <style>
+
+  </style>
 </head>
 
 <body id="page-top">

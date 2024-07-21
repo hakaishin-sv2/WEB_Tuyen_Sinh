@@ -109,7 +109,12 @@ function PostCreate($conn)
                     insert($conn, "post_tag", $tag_data);
                 }
             }
-
+            $data_thong_bao = [
+                "post_id" => $post_id,
+                "user_id" => $_SESSION["user"]["id"],
+                "message" => "Bạn có thông kiểm duyệt bài viết của - ",
+            ];
+            insert($conn, "notifications", $data_thong_bao);
             // Commit transaction nếu không có lỗi
             mysqli_commit($conn);
 

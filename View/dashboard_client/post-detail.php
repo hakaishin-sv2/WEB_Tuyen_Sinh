@@ -158,8 +158,15 @@
 
 
               </table>
-              <a href="index.php?act=posts" class="btn btn-danger">Quay lại</a>
+              <a href="index.php?act=posts" class="btn btn-info">Quay lại</a>
               <a href="index.php?act=post-update&id=<?= isset($_GET['id']) ? $_GET['id'] : '' ?>" class="btn btn-warning">Update</a>
+              <?php if ($post_dto_item["status"] == 0 && $_SESSION["user"]["role"] == 3) : ?>
+                <a href="index.php?act=post-delete&id=<?= htmlspecialchars($post_dto_item["id"]) ?>" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa</a>
+              <?php endif; ?>
+              <?php if ($post_dto_item["status"] == 0 && $_SESSION["user"]["role"] == 2) : ?>
+                <a href="index.php?act=post-approve&id=<?= htmlspecialchars($post_dto_item["id"]) ?>" class="btn btn-success" onclick="return confirm('Bạn có phê duyệt bài này không?')"> Phê Duyệt</a>
+              <?php endif; ?>
+              <a href="index.php?act=prewview-post&id=<?= htmlspecialchars($post_dto_item['id']) ?>" class="btn btn-light" target="_blank">Preview</a>
             </div>
           </div>
         </div>

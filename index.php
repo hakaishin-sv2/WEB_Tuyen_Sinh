@@ -103,12 +103,29 @@ switch ($act) {
     case 'post-detail':
         if (isset($_GET['id'])) {
             check_user_session($act);
+            if (isset($_GET['notification_id'])) {
+                $notificationId = $_GET['notification_id'];
+                if (!isset($_SESSION['seen_notifications'])) {
+                    $_SESSION['seen_notifications'] = [];
+                }
+                // Kiểm tra nếu ID thông báo chưa có trong mảng seen_notifications trong sesion không
+                // Mục đích ở đây là update lại trạng thái đã đọc thông báo dựa trên id thông báo của bảng notificationId
+                // Nếu đã đọc rồi thì sẽ cập nhật là is_read là 1 rồi lưu vào mảng $_SESSION['seen_notifications'] ấy
+                // Nếu chưa sẽ cập nhật là đã đọc vì khi cứ load lại url nó sẽ cập nhật vào database 
+                // Nên để hạn chế gọi database thì lưu vào cái Session đó và khi kiểm tra cái notification_id chưa có trong
+                // Chưa có trong $_SESSION['seen_notifications'] thì mới cập nhật vào database
+                if (!in_array($notificationId, $_SESSION['seen_notifications'])) {
+                    updateNotificationStatus($conn, $notificationId);
+                    $_SESSION['seen_notifications'][] = $notificationId;
+                }
+            }
             get_Postd_item($conn, $_GET['id']);
         } else {
             echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
             require_once PATH_VIEW_CLIENT . '404.php';
         }
         break;
+
     case 'post-update':
         if (isset($_GET['id'])) {
             check_user_session($act);
@@ -144,6 +161,9 @@ switch ($act) {
             echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
             require_once PATH_VIEW_CLIENT . '404.php';
         }
+        break;
+    case 'all-thong-bao':
+        Thong_bao_page($conn);
         break;
 
     case 'test':

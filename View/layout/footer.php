@@ -58,7 +58,7 @@
                 <a href="index.php?act=single-post&post-id=<?php echo $post['id']; ?>" class="d-flex align-items-center">
                   <img src="<?php echo str_replace('../', '', $post['img_thumbnail']); ?>" alt="<?php echo $post['title']; ?>" class="img-fluid me-3">
                   <div>
-                    <div class="post-meta d-block"><span class="date"><?php echo $post['category_name']; ?></span> <span class="mx-1">&bullet;</span> <span><?php echo date('M jS \'y', strtotime($post['created_at'])); ?></span></div>
+                    <div class="post-meta d-block"><span class="date"><?php echo $post['category_name']; ?></span> <span class="mx-1">&bullet;</span> <span><?php echo date('d/m/Y', strtotime($post['created_at'])); ?></span></div>
                     <span><?php echo $post['title']; ?></span>
                   </div>
                 </a>

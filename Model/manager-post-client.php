@@ -221,26 +221,17 @@ function getTagsByPostID($conn, $post_id)
     $tags = [];
 
     // Query để lấy các tag của post_id từ bảng post_tag
-    $query = "SELECT tag_id
-          FROM post_tag
-          WHERE post_id = ?";
-
-
-    // Chuẩn bị câu truy vấn
+    $query = "SELECT tag_id FROM post_tag WHERE post_id = ?";
     $stmt = $conn->prepare($query);
+    if ($stmt === false) {
+        die('Chuẩn bị câu truy vấn thất bại: ' . $conn->error);
+    }
     $stmt->bind_param("i", $post_id);
     $stmt->execute();
     $result = $stmt->get_result();
-
-    // Lặp qua kết quả và đưa vào mảng $tags
-    $tags = [];
     while ($row = $result->fetch_assoc()) {
         $tags[] = $row['tag_id'];
     }
-
-    return $tags;
-
-    // Đóng câu truy vấn
     $stmt->close();
 
     return $tags;
