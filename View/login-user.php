@@ -61,8 +61,11 @@
                                                 <input type="checkbox" class="custom-control-input" id="customCheck">
                                                 <label class="custom-control-label" for="customCheck">Remember
                                                     Me</label>
+                                                <a href="index.php?act=register">Đăng ký</a>
                                             </div>
+
                                         </div>
+
                                         <?php unset($_SESSION['data_err']); ?>
                                         <button type="submit" class="btn btn-primary btn-user btn-block">Login</button>
 

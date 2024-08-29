@@ -10,8 +10,9 @@
   <meta name="description" content="" />
   <meta name="author" content="" />
 
-  <title>SB Admin 2 - Tables</title>
-
+  <title>SB Admin 2 - Author</title>
+  <!-- Link bottrap selectoption để search trong combobox -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css">
   <!-- Custom fonts for this template -->
   <link
     href="view/vendor/fontawesome-free/css/all.min.css"
@@ -48,7 +49,7 @@
         <!-- Begin Page Content -->
         <div class="container-fluid">
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Thêm mới user</h1>
+          <h1 class="h3 mb-2 text-gray-800">Giao quyền kiểm duyệt</h1>
           <!-- <p class="mb-4">
               DataTables is a third party plugin that is used to generate the
               demo table below. For more information about DataTables, please
@@ -62,7 +63,7 @@
           <div class="card shadow mb-4">
             <div class="card-header py-3">
               <h6 class="m-0 font-weight-bold text-primary">
-                Thêm user
+                <!-- Thêm thẻ Tag mới -->
               </h6>
             </div>
             <div class="card-body">
@@ -78,36 +79,54 @@
                 </div>
               <?php endif; ?>
 
-              <form action="" method="POST">
-                <div class="mb-3 mt-3">
-                  <label for="full_name" class="form-lable">Full Name: </label>
-                  <input type="text" class="form-control" id="full_name" name="full_name"
-                    value="<?= isset($_SESSION['data_err']['full_name']) ? htmlspecialchars($_SESSION['data_err']['full_name'], ENT_QUOTES, 'UTF-8') : '' ?>">
-                </div>
-                <div class="mb-3 mt-3">
-                  <label for="email" class="form-lable">Email: </label>
-                  <input type="email" class="form-control" id="email" name="email"
-                    value="<?= isset($_SESSION['data_err']['email']) ? htmlspecialchars($_SESSION['data_err']['email'], ENT_QUOTES, 'UTF-8') : '' ?>">
-                </div>
-                <!-- <div class="mb-3 mt-3">
-                        <label for="username" class="form-lable">username: </label>
-                        <input type="text"  class="form-control" id="username" name="username">
-                    </div> -->
-                <div class="mb-3 mt-3">
-                  <label for="password" class="form-lable">password: </label>
-                  <input type="password" class="form-control" id="password" name="password">
-                </div>
-                <div class="mb-3 mt-3">
-                  <label for="role" class="form-lable">Vai trò: </label>
-                  <select name="role" id="role" class="form-control">
-                    <option value="admin">Admin</option>
-                    <option value="teacher">Người kiểm duyệt</option>
-                    <option value="student">User</option>
+              <div class="container mt-5">
+                <h2> </h2>
+                <form action="" method="post" enctype="multipart/form-data">
+                  <div class="form-group">
+                    <label for="user_id">Chọn Người Dùng</label>
+                    <select class="selectpicker form-control" id="user_id" name="user_id" data-live-search="true" required>
+                      <option value="">Chọn người dùng...</option>
+                      <?php //print_r($users);
+                      foreach ($users as $user): ?>
+                        <option value="<?= $user['id'] ?>">
+                          <?= htmlspecialchars($user['full_name']) ?> - Email: <?= htmlspecialchars($user['email']) ?>
+                        </option>
+                      <?php endforeach; ?>
 
-                  </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </form>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="majors">Chọn ngành:</label>
+                    <div class="row">
+                      <?php foreach ($MajorsList as $major) : ?>
+                        <div class="col-md-6 mb-3">
+                          <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="majors[]" id="major_<?= htmlspecialchars($major['industry_code']) ?>" value="<?= htmlspecialchars($major['id']) ?>">
+                            <label class="form-check-label" for="major_<?= htmlspecialchars($major['industry_code']) ?>">
+                              <?= htmlspecialchars($major['industry_code']) ?> - <?= htmlspecialchars($major['ten_nganh']) ?>
+                            </label>
+                          </div>
+                        </div>
+                      <?php endforeach; ?>
+                    </div>
+                  </div>
+
+                  <!-- <div class="form-group">
+                    <img id="avatar-preview" src="#" alt="Ảnh Avatar" style="max-width: 200px; max-height: 200px; display: none;">
+                  </div>
+                  <div class="form-group">
+                    <label for="avatar">Chọn Ảnh Avatar</label>
+                    <input type="file" class="form-control-file" id="avatar" name="avatar" accept="image/*">
+                    <small class="form-text text-muted">Chọn một file ảnh để làm Avatar.</small>
+                  </div> -->
+                  <!-- <div class="form-group">
+                    <label for="bio">Tiểu Sử</label>
+                    <textarea class="form-control" id="bio" name="bio" rows="3" required></textarea>
+                  </div> -->
+
+                  <button type="submit" class="btn btn-primary">Giao quyền kiểm duyệt hồ sơ</button>
+                </form>
+              </div>
               <?php unset($_SESSION['data_err']); ?>
             </div>
           </div>
@@ -172,6 +191,9 @@
   <!-- Core plugin JavaScript-->
   <script src="view/vendor/jquery-easing/jquery.easing.min.js"></script>
 
+  <!-- Bootstrap Select JavaScript trong combobox select option -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script>
+
   <!-- Custom scripts for all pages-->
   <script src="view/js/sb-admin-2.min.js"></script>
 
@@ -181,6 +203,17 @@
 
   <!-- Page level custom scripts -->
   <script src="view/js/demo/datatables-demo.js"></script>
+
+  <script>
+    $(document).ready(function() {
+      // Xử lý khi input file thay đổi
+      $('#avatar').change(function() {
+        var input = this;
+        var url = URL.createObjectURL(input.files[0]);
+        $('#avatar-preview').attr('src', url).show();
+      });
+    });
+  </script>
 </body>
 
 </html>

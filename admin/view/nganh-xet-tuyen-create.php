@@ -41,7 +41,7 @@
         <!-- Begin Page Content -->
         <div class="container-fluid">
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Tạo bài viết</h1>
+          <h1 class="h3 mb-2 text-gray-800">Tạo ngành xét tuyển mới</h1>
           <!-- <p class="mb-4">
               DataTables is a third party plugin that is used to generate the
               demo table below. For more information about DataTables, please
@@ -72,95 +72,56 @@
               <?php endif; ?>
 
               <div class="container mt-5">
-                <h2>Thêm bài viết mới</h2>
-                <form action="" method="POST" enctype="multipart/form-data">
+                <h2>Nhập thông tin</h2>
+                <br>
+                <form action="process_major.php" method="POST" enctype="multipart/form-data">
                   <div class="row">
+                    <!-- Cột trái -->
                     <div class="col-md-6">
+                      <!-- Mã ngành -->
+                      <div class="form-group">
+                        <label for="industry_code">Mã ngành:</label>
+                        <input type="text" class="form-control" id="industry_code" name="industry_code" placeholder="Nhập mã ngành" required>
+                      </div>
 
+                      <!-- Tên ngành -->
                       <div class="form-group">
-                        <label for="title">Title:</label>
-                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter title" value="<?= $post_item["title"] ?>">
+                        <label for="name">Tên ngành:</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Nhập tên ngành" required>
                       </div>
-                      <div class="form-group">
-                        <label for="select_category">Category:</label>
-                        <select name="select_category" id="select_category" class="form-control">
-                          <option value="">Chọn danh mục...</option>
-                          <?php foreach ($categories as $categr) : ?>
-                            <option value="<?= $categr['id'] ?>" <?= $post_item["category_id"] == $categr["id"] ? 'selected' : '' ?>>
-                              <?= $categr['name_category'] ?>
-                            </option>
-                          <?php endforeach; ?>
-                        </select>
-                      </div>
-                      <div class="form-group">
-                        <p style="color:red; font-size: 15px ">Nếu thuộc tin về bóng đá hãy chọn là Trong nước hay ngoài nước</p>
-                        <label>Tin tức</label><br>
-                        <input type="radio" id="is_domestic" name="news_type" value="domestic" <?= $post_item["area"] == 0 ? 'checked' : '' ?> style="margin-right: 10px;">
-                        <label for="is_domestic" style="margin-right: 20px;">Tin trong nước</label>
 
-                        <input type="radio" id="is_foreign" name="news_type" value="foreign" <?= $post_item["area"] == 1 ? 'checked' : '' ?> style="margin-right: 10px;">
-                        <label for="is_foreign" style="margin-right: 20px;">Tin ngoài nước</label>
-                      </div>
+                      <!-- Mô tả ngành -->
                       <div class="form-group">
-                        <label for="excerpt">excerpt:</label>
-                        <textarea class="form-control" id="excerpt" name="excerpt" rows="3" placeholder="Mô tả ngắn bài viết"><?= $post_item["excerpt"] ?></textarea>
+                        <label for="description">Mô tả ngành:</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Mô tả ngắn về ngành"></textarea>
                       </div>
+
+                      <!-- Chọn mã tổ hợp -->
                       <div class="form-group">
-                        <label for="tags"> Thẻ Tag:</label>
-                        <select name="tags[]" id="tags" class="form-control" multiple>
-                          <?php foreach ($tags as $tag) : ?>
-                            <option value="<?= $tag['id'] ?>" <?= in_array($tag['id'], $post_tags) ? 'selected' : '' ?>>
-                              <?= $tag['name_tag'] ?>
-                            </option>
+                        <label for="exam_blocks">Chọn tổ hợp môn:</label>
+                        <div class="row">
+                          <?php foreach ($exam_blocks as $block) : ?>
+                            <div class="col-md-6 mb-3">
+                              <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="exam_blocks[]" id="block_<?= $block['id'] ?>" value="<?= $block['id'] ?>">
+                                <label class="form-check-label" for="block_<?= $block['id'] ?>">
+                                  <?= htmlspecialchars($block['code']) ?> - <?= htmlspecialchars($block['name']) ?>
+                                </label>
+                              </div>
+                            </div>
                           <?php endforeach; ?>
-                        </select>
+                        </div>
                       </div>
+
+
+                      <!-- Nút submit -->
                       <div class="form-group">
-                        <!-- Hiển thị ảnh nhỏ preview nếu có -->
-                        <img id="imgthumbnail-preview" src="<?= isset($post_item['img_thumbnail']) ? $author_item['img_thumbnail'] : '' ?>" alt="Ảnh Avatar" style="max-width: 200px; max-height: 200px; display: none;">
+                        <button type="submit" class="btn btn-primary">Thêm ngành</button>
                       </div>
-                      <div class="form-group">
-                        <label for="imgthumbnail">Ảnh nhỏ</label>
-                        <input type="file" class="form-control-file" id="imgthumbnail" name="imgthumbnail" accept="image/*">
-                        <small class="form-text text-muted">Chọn một file ảnh cho bài viết.</small>
-                      </div>
-                      <div class="form-group">
-                        <label for="select_category">Trạng thái bài viết:</label>
-                        <select name="status" id="status" class="form-control" required>
-                          <option value="1" <?= $post_item['status'] == 1 ? 'selected' : '' ?>>Public Post</option>
-                          <option value="0" <?= $post_item['status'] == 0 ? 'selected' : '' ?>>Chưa duyệt</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <!-- Hiển thị ảnh cover preview nếu có -->
-                        <img id="imgcover-preview" src="<?= isset($post_item['img_cover']) ? $author_item['img_cover'] : '' ?>" alt="Ảnh cover" style="max-width: 200px; max-height: 200px; display: none;">
-                      </div>
-                      <div class="form-group">
-                        <label for="imgcover">Ảnh cover trending</label>
-                        <input type="file" class="form-control-file" id="imgcover" name="imgcover" accept="image/*">
-                        <small class="form-text text-muted">Chọn một file ảnh cho bài viết.</small>
-                      </div>
-                      <div class="form-group">
-                        <label for="is_trending">Is Trending:</label>
-                        <select name="is_trending" id="is_trending" class="form-control" required>
-                          <option value="0" <?= $post_item['is_trending'] == 0 ? 'selected' : '' ?>>No</option>
-                          <option value="1" <?= $post_item['is_trending'] == 1 ? 'selected' : '' ?>>Yes</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="col-12">
-                      <div class="form-group">
-                        <label for="content">Content</label>
-                        <textarea class="form-control" id="content" name="content" rows="3"><?= htmlspecialchars($post_item["content"], ENT_QUOTES, 'UTF-8'); ?></textarea>
-                      </div>
-                    </div>
-                    <div class="col-12">
-                      <button type="submit" class="btn btn-primary">Update</button>
                     </div>
                   </div>
                 </form>
+
                 <?php unset($_SESSION['data_err']) ?>
 
               </div>

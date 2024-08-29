@@ -4,30 +4,21 @@
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <meta name="description" content="" />
   <meta name="author" content="" />
 
-  <title>SB Admin 2 - Tables</title>
+  <title>SB Admin 2 - Manager Posts</title>
 
   <!-- Custom fonts for this template -->
-  <link
-    href="view/vendor/fontawesome-free/css/all.min.css"
-    rel="stylesheet"
-    type="text/css" />
-  <link
-    href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-    rel="stylesheet" />
+  <link href="view/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css" />
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet" />
 
   <!-- Custom styles for this template -->
   <link href="view/css/sb-admin-2.min.css" rel="stylesheet" />
 
   <!-- Custom styles for this page -->
-  <link
-    href="view/vendor/datatables/dataTables.bootstrap4.min.css"
-    rel="stylesheet" />
+  <link href="view/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
 </head>
 
 <body id="page-top">
@@ -48,7 +39,7 @@
         <!-- Begin Page Content -->
         <div class="container-fluid">
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Quản lý user</h1>
+          <h1 class="h3 mb-2 text-gray-800">Quản lý các ngành xét tuyển</h1>
           <!-- <p class="mb-4">
               DataTables is a third party plugin that is used to generate the
               demo table below. For more information about DataTables, please
@@ -66,80 +57,69 @@
               </h6>
             </div>
             <div class="card-body">
-              <?php if (isset($_SESSION["success"])): ?>
+              <?php if (isset($_SESSION["success"])) : ?>
                 <div class="alert alert-success">
                   <?= $_SESSION["success"]   ?>
                 </div>
                 <?php unset($_SESSION["success"]);  ?>
               <?php endif; ?>
               <div class="table-responsive">
-                <table
-                  class="table table-bordered"
-                  id="dataTable"
-                  width="100%"
-                  cellspacing="0">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                   <thead>
                     <tr>
                       <th>ID</th>
-                      <th>Ảnh</th>
-                      <th>Full_Name</th>
-                      <th>EMAIL</th>
-                      <th>Ngày Tạo</th>
-                      <th>ROLE</th>
-                      <th>ACTION</th>
-                      <!-- <th>Salary</th> -->
+                      <th>industry code</th>
+                      <th>Tên ngành</th>
+                      <th>Khối xét tuyển</th>
+                      <th>Description</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tfoot>
                     <tr>
                       <th>ID</th>
-                      <th>Ảnh</th>
-                      <th>Full_Name</th>
-                      <th>EMAIL</th>
-                      <th>Ngày Tạo</th>
-                      <th>ROLE</th>
-                      <th>ACTION</th>
+                      <th>industry code</th>
+                      <th>Tên ngành</th>
+                      <th>Khối xét tuyển</th>
+                      <th>Description</th>
+                      <th>Action</th>
                     </tr>
                   </tfoot>
                   <tbody>
-                    <?php //print_r($listUser);
-                    foreach ($listUser as $user): ?>
+                    <?php //print_r($list);
+                    foreach ($list as $item) : ?>
                       <tr>
-                        <td><?= $user["id"] ?></td>
-                        <td>
-                          <?php if (!empty($user["img_user"])): ?>
-                            <img src="<?= "../" . htmlspecialchars($user["img_user"]) ?>" alt="img_user" class="rounded-circle" style="width: 100px; height: 100px;">
-                          <?php else: ?>
-                            <span>No Avatar</span>
-                          <?php endif; ?>
-                        </td>
-                        <td><?= $user["full_name"] ?></td>
-                        <td><?= $user["email"] ?></td>
-                        <td><?= $user["created_at"] ?></td>
+                        <td><?= htmlspecialchars($item["major_id"]) ?></td>
+                        <td><?= htmlspecialchars($item["industry_code"]) ?></td>
+                        <td><?= htmlspecialchars($item["major_name"]) ?></td>
                         <td>
                           <?php
-                          if ($user["role"] === "admin") {
-                            echo '<span class="badge badge-success">ADMIN</span>';
-                          } elseif ($user["role"] === "student") {
-                            echo '<span class="badge badge-warning">User</span>';
-                          } elseif ($user["role"] === "teacher") {
-                            echo '<span class="badge badge-primary">Người xét hồ sơ</span>';
+                          // Kiểm tra xem 'exam_blocks' có dữ liệu hay không
+                          if (!empty($item["exam_blocks"])) {
+                            // Sử dụng explode để tách chuỗi 'exam_blocks' thành mảng, sử dụng dấu '+' làm ký tự phân tách
+                            $exam_blocks = explode('+', htmlspecialchars($item["exam_blocks"]));
+
+                            // Duyệt qua mỗi phần tử trong mảng và hiển thị trên một dòng riêng biệt
+                            foreach ($exam_blocks as $block) {
+                              echo htmlspecialchars($block) . "<br>"; // Hiển thị mỗi tổ hợp trên một dòng
+                            }
                           } else {
-                            echo '<span class="badge badge-secondary">Kiểm duyệt viên</span>';
+                            echo "Không có khối xét tuyển"; // Trường hợp không có dữ liệu
                           }
                           ?>
                         </td>
+
+                        <td><?= htmlspecialchars($item["description"]) ?></td>
                         <td>
-                          <a href="index.php?act=user-detail&id=<?= $user["id"] ?>" class="btn btn-info">Show</a>
-                          <a href="index.php?act=user-update&id=<?= $user["id"] ?>" class="btn btn-warning">Update</a>
-                          <a href="index.php?act=user-delete&id=<?= $user["id"] ?>" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa</a>
+                          <a href="index.php?act=nganh-xet-tuyen-detail&id=<?= htmlspecialchars($item["major_id"]) ?>" class="btn btn-info">Show</a>
+                          <a href="index.php?act=nganh-xet-tuyen-update&id=<?= htmlspecialchars($item["major_id"]) ?>" class="btn btn-warning">Update</a>
+                          <a href="index.php?act=nganh-xet-tuyen-delete&id=<?= htmlspecialchars($item["major_id"]) ?>" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa</a>
                         </td>
                       </tr>
                     <?php endforeach; ?>
-
                   </tbody>
-
                 </table>
+
               </div>
             </div>
           </div>
@@ -162,22 +142,12 @@
   </a>
 
   <!-- Logout Modal-->
-  <div
-    class="modal fade"
-    id="logoutModal"
-    tabindex="-1"
-    role="dialog"
-    aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
+  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-          <button
-            class="close"
-            type="button"
-            data-dismiss="modal"
-            aria-label="Close">
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">×</span>
           </button>
         </div>
@@ -185,10 +155,7 @@
           Select "Logout" below if you are ready to end your current session.
         </div>
         <div class="modal-footer">
-          <button
-            class="btn btn-secondary"
-            type="button"
-            data-dismiss="modal">
+          <button class="btn btn-secondary" type="button" data-dismiss="modal">
             Cancel
           </button>
           <a class="btn btn-primary" href="login.html">Logout</a>

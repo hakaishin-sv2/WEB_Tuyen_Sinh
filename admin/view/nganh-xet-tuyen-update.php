@@ -60,7 +60,10 @@
             </div>
             <div class="card-body">
 
-              <?php if (isset($_SESSION["errors"])) : ?>
+              <?php
+
+
+              if (isset($_SESSION["errors"])) : ?>
                 <div class="alert alert-danger">
                   <ul>
                     <?php foreach ($_SESSION["errors"] as $error) : ?>
@@ -72,95 +75,54 @@
               <?php endif; ?>
 
               <div class="container mt-5">
-                <h2>Thêm bài viết mới</h2>
-                <br>
+                <h2>Update bài viết mới</h2>
                 <form action="" method="POST" enctype="multipart/form-data">
                   <div class="row">
+                    <!-- Cột trái -->
                     <div class="col-md-6">
+                      <!-- Mã ngành -->
                       <div class="form-group">
-                        <label for="title">Title:</label>
-                        <input type="text" class="form-control" id="title" name="title" placeholder="Enter title" value="<?= isset($_SESSION['data_err']['title']) ? htmlspecialchars($_SESSION['data_err']['title'], ENT_QUOTES, 'UTF-8') : '' ?>">
+                        <label for="industry_code">Mã ngành:</label>
+                        <input type="text" class="form-control" id="industry_code" name="industry_code" placeholder="Nhập mã ngành" value="<?= htmlspecialchars($form_data['industry_code']); ?>" required>
                       </div>
-                      <div class="form-group">
-                        <label for="select_category">Category:</label>
-                        <select name="select_category" id="select_category" class="form-control">
-                          <option value="">Chọn danh mục...</option>
-                          <?php foreach ($categories as $categr) : ?>
-                            <option value="<?= $categr['id'] ?>" <?= isset($_SESSION['data_err']['select_category']) && $_SESSION['data_err']['select_category'] == $categr['id'] ? 'selected' : '' ?>>
-                              <?= $categr['name_category'] ?>
-                            </option>
-                          <?php endforeach; ?>
-                        </select>
-                      </div>
-                      <div class="form-group">
-                        <p style="color:red; font-size: 15px ">Nếu thuộc tin về bóng đá hãy chọn là Trong nước hay ngoài nước</p>
-                        <label>Tin tức</label><br>
-                        <input type="radio" id="is_domestic" name="news_type" value="domestic" <?= isset($_SESSION['data_err']['news_type']) && $_SESSION['data_err']['news_type'] == 'domestic' ? 'checked' : '' ?> style="margin-right: 10px;">
-                        <label for="is_domestic" style="margin-right: 20px;">Tin trong nước</label>
 
-                        <input type="radio" id="is_foreign" name="news_type" value="foreign" <?= isset($_SESSION['data_err']['news_type']) && $_SESSION['data_err']['news_type'] == 'foreign' ? 'checked' : '' ?> style="margin-right: 10px;">
-                        <label for="is_foreign" style="margin-right: 20px;">Tin ngoài nước</label>
-                      </div>
+                      <!-- Tên ngành -->
                       <div class="form-group">
-                        <label for="excerpt">excerpt:</label>
-                        <textarea class="form-control" id="excerpt" name="excerpt" rows="3" placeholder="Mô tả ngắn bài viết"><?= isset($_SESSION['data_err']['excerpt']) ? htmlspecialchars($_SESSION['data_err']['excerpt'], ENT_QUOTES, 'UTF-8') : '' ?></textarea>
+                        <label for="name">Tên ngành:</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Nhập tên ngành" value="<?= htmlspecialchars($form_data['major_name']); ?>" required>
                       </div>
+
+                      <!-- Mô tả ngành -->
                       <div class="form-group">
-                        <label for="tags"> Thẻ Tag:</label>
-                        <select name="tags[]" id="tags" class="form-control" multiple>
-                          <?php foreach ($tags as $tag) : ?>
-                            <option value="<?= $tag['id'] ?>" <?= isset($_SESSION['data_err']['tags']) && in_array($tag['id'], $_SESSION['data_err']['tags']) ? 'selected' : '' ?>>
-                              <?= $tag['name_tag'] ?>
-                            </option>
+                        <label for="description">Mô tả ngành:</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Mô tả ngắn về ngành"><?= htmlspecialchars($form_data['description']); ?></textarea>
+                      </div>
+
+                      <!-- Chọn mã tổ hợp -->
+                      <div class="form-group">
+                        <label for="exam_blocks">Chọn tổ hợp môn:</label>
+                        <div class="row">
+                          <?php foreach ($exam_blocks as $block) : ?>
+                            <div class="col-md-6 mb-3">
+                              <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="exam_blocks[]" id="block_<?= $block['id'] ?>" value="<?= $block['id'] ?>" <?= in_array($block['id'], explode(',', $form_data['selected_blocks'])) ? 'checked' : '' ?>>
+                                <label class="form-check-label" for="block_<?= $block['id'] ?>">
+                                  <?= htmlspecialchars($block['code']) ?> - <?= htmlspecialchars($block['name']) ?>
+                                </label>
+                              </div>
+                            </div>
                           <?php endforeach; ?>
-                        </select>
+                        </div>
                       </div>
+
+                      <!-- Nút submit -->
                       <div class="form-group">
-                        <!-- Hiển thị ảnh nhỏ preview nếu có -->
-                        <img id="imgthumbnail-preview" src="#" alt="Ảnh Avatar" style="max-width: 200px; max-height: 200px; display: none;">
+                        <button type="submit" class="btn btn-primary">Cập nhật ngành</button>
                       </div>
-                      <div class="form-group">
-                        <label for="imgthumbnail">Ảnh nhỏ</label>
-                        <input type="file" class="form-control-file" id="imgthumbnail" name="imgthumbnail" accept="image/*">
-                        <small class="form-text text-muted">Chọn một file ảnh cho bài viết.</small>
-                      </div>
-                      <div class="form-group">
-                        <label for="select_category">Status:</label>
-                        <select name="status" id="status" class="form-control" required>
-                          <option value="1" <?= isset($_SESSION['data_err']['status']) && $_SESSION['data_err']['status'] == 1 ? 'selected' : '' ?>>Public Post</option>
-                          <option value="0" <?= isset($_SESSION['data_err']['status']) && $_SESSION['data_err']['status'] == 0 ? 'selected' : '' ?>>Chưa duyệt</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="col-md-6">
-                      <div class="form-group">
-                        <!-- Hiển thị ảnh cover preview nếu có -->
-                        <img id="imgcover-preview" src="#" alt="Ảnh Avatar" style="max-width: 200px; max-height: 200px; display: none;">
-                      </div>
-                      <div class="form-group">
-                        <label for="imgcover">Ảnh cover trending</label>
-                        <input type="file" class="form-control-file" id="imgcover" name="imgcover" accept="image/*">
-                        <small class="form-text text-muted">Chọn một file ảnh cho bài viết.</small>
-                      </div>
-                      <div class="form-group">
-                        <label for="is_trending">Is Trending:</label>
-                        <select name="is_trending" id="is_trending" class="form-control" required>
-                          <option value="0" <?= isset($_SESSION['data_err']['is_trending']) && $_SESSION['data_err']['is_trending'] == 0 ? 'selected' : '' ?>>No</option>
-                          <option value="1" <?= isset($_SESSION['data_err']['is_trending']) && $_SESSION['data_err']['is_trending'] == 1 ? 'selected' : '' ?>>Yes</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div class="col-12">
-                      <div class="form-group">
-                        <label for="content">Content</label>
-                        <textarea class="form-control" id="content" name="content" rows="3"><?= isset($_SESSION['data_err']['content']) ? htmlspecialchars($_SESSION['data_err']['content'], ENT_QUOTES, 'UTF-8') : '' ?></textarea>
-                      </div>
-                    </div>
-                    <div class="col-12">
-                      <button type="submit" class="btn btn-primary">Thêm bài viết</button>
                     </div>
                   </div>
                 </form>
+
                 <?php unset($_SESSION['data_err']) ?>
 
               </div>

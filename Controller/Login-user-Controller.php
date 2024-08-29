@@ -22,7 +22,7 @@ function LoginForm_user($conn)
             exit();
         }
         $_SESSION['user'] = $user_login;
-        if ($user_login["role"] == 1) {
+        if ($user_login["role"] == "admin") {
             header('Location: ' . BASE_URL_ADMIN);
             exit();
         } else {

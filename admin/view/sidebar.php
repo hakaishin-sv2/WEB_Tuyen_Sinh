@@ -103,32 +103,48 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Banner:</h6>
                 <a class="collapse-item" href="index.php?act=posts">Danh sách banner</a>
-                <a class="collapse-item" href="index.php?act=post-create">Thêm mới banner</a>
+                <!-- <a class="collapse-item" href="index.php?act=post-create">Thêm mới banner</a> -->
+            </div>
+        </div>
+    </li>
+
+    <!-- Nav Item - Tuyển sinh -->
+    <li class="nav-item">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAdmission" aria-expanded="true" aria-controls="collapseAdmission">
+            <i class="fas fa-fw fa-graduation-cap"></i> <!-- Biểu tượng cho quản lý tuyển sinh -->
+            <span>Quản lý tuyển sinh</span>
+        </a>
+        <div id="collapseAdmission" class="collapse" aria-labelledby="headingAdmission" data-parent="#accordionSidebar">
+            <div class="bg-white py-2 collapse-inner rounded">
+                <h6 class="collapse-header">Quản lý tuyển sinh:</h6>
+                <a class="collapse-item" href="index.php?act=list-open-majors">Quản lý cổng tuyển sinh</a>
+                <!-- <a class="collapse-item" href="index.php?act=closed-majors">Các ngành chưa mở</a> -->
+                <a class="collapse-item" href="index.php?act=open-application">Mở cổng nhận hồ sơ</a>
             </div>
         </div>
     </li>
 
 
     <!-- Nav Item - Posts-manager -->
-    <li class="nav-item">
+    <!-- <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePost" aria-expanded="true" aria-controls="collapsePost">
             <i class="fas fa-newspaper"></i>
-            <span>Quản lý bài viết</span>
+            <span>Ngành xét tuyển</span>
         </a>
         <div id="collapsePost" class="collapse" aria-labelledby="headingPost" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Chức năng quản lý bài viết:</h6>
-                <a class="collapse-item" href="index.php?act=posts">Danh sách bài viết</a>
-                <a class="collapse-item" href="index.php?act=post-create">Thêm mới bài viết</a>
+                <h6 class="collapse-header">Quảnh lý ngành xét tuyển:</h6>
+                <a class="collapse-item" href="index.php?act=nganh-xet-tuyen-list">Danh sách các ngành</a>
+                <a class="collapse-item" href="index.php?act=nganh-xet-tuyen-create">Thêm mới ngành</a>
             </div>
         </div>
     </li>
-
+ -->
 
     <!-- Nav Item - User-manager -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUser" aria-expanded="true" aria-controls="collapseUser">
-            <i class="fas fa-fw fa-folder"></i>
+            <i class="fas fa-fw fa-users"></i> <!-- Thay đổi biểu tượng tại đây -->
             <span>Quản lý user</span>
         </a>
         <div id="collapseUser" class="collapse" aria-labelledby="headingUser" data-parent="#accordionSidebar">
@@ -140,32 +156,33 @@
         </div>
     </li>
 
+
     <!-- Nav Item - Category-manager -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCategory" aria-expanded="true" aria-controls="collapseCategory">
             <i class="fas fa-folder"></i>
-            <span>Quản lý danh mục</span>
+            <span>Quản lý khối xét tuyển</span>
         </a>
         <div id="collapseCategory" class="collapse" aria-labelledby="headingCategory" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Quản lý danh mục:</h6>
-                <a class="collapse-item" href="index.php?act=categories">Danh sách danh mục</a>
-                <a class="collapse-item" href="index.php?act=category-create">Thêm mới danh mục</a>
+                <a class="collapse-item" href="index.php?act=exam-block-list">Khối xét tuyển</a>
+                <a class="collapse-item" href="index.php?act=exam-block-create">Thêm mới khối xét tuyển</a>
             </div>
         </div>
     </li>
 
-    <!-- Nav Item - Tag-manager -->
+    <!-- Nav Item - ngành xét tuyển-manager -->
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTag" aria-expanded="true" aria-controls="collapseTag">
             <i class="fas fa-tags"></i>
-            <span>Quản lý thẻ Tags</span>
+            <span>Quản lý ngành xét tuyển</span>
         </a>
         <div id="collapseTag" class="collapse" aria-labelledby="headingTag" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Quản lý thẻ Tags:</h6>
-                <a class="collapse-item" href="index.php?act=tags">Danh sách thẻ</a>
-                <a class="collapse-item" href="index.php?act=tag-create">Thêm mới thẻ</a>
+                <h6 class="collapse-header">Quản ngành:</h6>
+                <a class="collapse-item" href="index.php?act=nganh-xet-tuyen-list">Danh sách các ngành</a>
+                <a class="collapse-item" href="index.php?act=nganh-xet-tuyen-create">Thêm mới ngành</a>
             </div>
         </div>
     </li>
@@ -174,13 +191,13 @@
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAuthor" aria-expanded="true" aria-controls="collapseAuthor">
             <i class="fas fa-users"></i>
-            <span>Quản lý Tác Giả</span>
+            <span>Phân giáo viên duyệt hồ sơ</span>
         </a>
         <div id="collapseAuthor" class="collapse" aria-labelledby="headingAuthor" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Chức năng quản lý:</h6>
-                <a class="collapse-item" href="index.php?act=authors">Danh sách Tác Giả</a>
-                <a class="collapse-item" href="index.php?act=author-create">Thêm mới Tác Giả</a>
+                <a class="collapse-item" href="index.php?act=assign-teachers">Danh sách đã phân công</a>
+                <a class="collapse-item" href="index.php?act=assign-teacher-create">Phân công mới</a>
             </div>
         </div>
     </li>

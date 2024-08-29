@@ -4,30 +4,21 @@
 <head>
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
   <meta name="description" content="" />
   <meta name="author" content="" />
 
-  <title>SB Admin 2 - Tables</title>
+  <title>SB Admin 2 - Manager Posts</title>
 
   <!-- Custom fonts for this template -->
-  <link
-    href="view/vendor/fontawesome-free/css/all.min.css"
-    rel="stylesheet"
-    type="text/css" />
-  <link
-    href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-    rel="stylesheet" />
+  <link href="view/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css" />
+  <link href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i" rel="stylesheet" />
 
   <!-- Custom styles for this template -->
   <link href="view/css/sb-admin-2.min.css" rel="stylesheet" />
 
   <!-- Custom styles for this page -->
-  <link
-    href="view/vendor/datatables/dataTables.bootstrap4.min.css"
-    rel="stylesheet" />
+  <link href="view/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet" />
 </head>
 
 <body id="page-top">
@@ -48,7 +39,7 @@
         <!-- Begin Page Content -->
         <div class="container-fluid">
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Quản lý user</h1>
+          <h1 class="h3 mb-2 text-gray-800">Quản lý tuyển sinh của các năm</h1>
           <!-- <p class="mb-4">
               DataTables is a third party plugin that is used to generate the
               demo table below. For more information about DataTables, please
@@ -66,80 +57,78 @@
               </h6>
             </div>
             <div class="card-body">
-              <?php if (isset($_SESSION["success"])): ?>
+              <?php if (isset($_SESSION["success"])) : ?>
                 <div class="alert alert-success">
                   <?= $_SESSION["success"]   ?>
                 </div>
                 <?php unset($_SESSION["success"]);  ?>
               <?php endif; ?>
               <div class="table-responsive">
-                <table
-                  class="table table-bordered"
-                  id="dataTable"
-                  width="100%"
-                  cellspacing="0">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                   <thead>
                     <tr>
                       <th>ID</th>
-                      <th>Ảnh</th>
-                      <th>Full_Name</th>
-                      <th>EMAIL</th>
-                      <th>Ngày Tạo</th>
-                      <th>ROLE</th>
-                      <th>ACTION</th>
-                      <!-- <th>Salary</th> -->
+                      <th>Năm</th>
+                      <th>Tuyển sinh</th>
+                      <th>Start_date</th>
+                      <th>End_date</th>
+                      <th>Trạng thái</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tfoot>
                     <tr>
                       <th>ID</th>
-                      <th>Ảnh</th>
-                      <th>Full_Name</th>
-                      <th>EMAIL</th>
-                      <th>Ngày Tạo</th>
-                      <th>ROLE</th>
-                      <th>ACTION</th>
+                      <th>Năm</th>
+                      <th>Tuyển sinh</th>
+                      <th>Start_date</th>
+                      <th>End_date</th>
+                      <th>Trạng thái</th>
+                      <th>Action</th>
                     </tr>
                   </tfoot>
                   <tbody>
-                    <?php //print_r($listUser);
-                    foreach ($listUser as $user): ?>
+                    <?php //print_r($list);
+                    $i = 1;
+                    foreach ($list as $item) : ?>
                       <tr>
-                        <td><?= $user["id"] ?></td>
+                        <td><?= $i;
+                            $i++ ?></td>
+                        <td><?= htmlspecialchars($item["year"]) ?></td>
+                        <td><?= htmlspecialchars($item["name"]) ?></td>
+                        <td><?= (new DateTime($item["start_date"]))->format('d/m/Y') ?></td>
+                        <td><?= (new DateTime($item["end_date"]))->format('d/m/Y') ?></td>
                         <td>
-                          <?php if (!empty($user["img_user"])): ?>
-                            <img src="<?= "../" . htmlspecialchars($user["img_user"]) ?>" alt="img_user" class="rounded-circle" style="width: 100px; height: 100px;">
-                          <?php else: ?>
-                            <span>No Avatar</span>
+                          <?php if ($item["status"] === 'active') : ?>
+                            <span class="badge badge-success"><?= htmlspecialchars($item["status"]) ?></span>
+                          <?php else : ?>
+                            <span class="badge badge-primary"><?= htmlspecialchars($item["status"]) ?></span>
                           <?php endif; ?>
                         </td>
-                        <td><?= $user["full_name"] ?></td>
-                        <td><?= $user["email"] ?></td>
-                        <td><?= $user["created_at"] ?></td>
                         <td>
-                          <?php
-                          if ($user["role"] === "admin") {
-                            echo '<span class="badge badge-success">ADMIN</span>';
-                          } elseif ($user["role"] === "student") {
-                            echo '<span class="badge badge-warning">User</span>';
-                          } elseif ($user["role"] === "teacher") {
-                            echo '<span class="badge badge-primary">Người xét hồ sơ</span>';
-                          } else {
-                            echo '<span class="badge badge-secondary">Kiểm duyệt viên</span>';
-                          }
-                          ?>
-                        </td>
-                        <td>
-                          <a href="index.php?act=user-detail&id=<?= $user["id"] ?>" class="btn btn-info">Show</a>
-                          <a href="index.php?act=user-update&id=<?= $user["id"] ?>" class="btn btn-warning">Update</a>
-                          <a href="index.php?act=user-delete&id=<?= $user["id"] ?>" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa</a>
-                        </td>
-                      </tr>
-                    <?php endforeach; ?>
+                          <a href="index.php?act=show-tuyen-sinh&year=<?= htmlspecialchars($item["year"]) ?>" class="btn btn-info">Show</a>
 
+                          <!-- Hiển thị nút Update chỉ khi status là 'active' -->
+                          <?php if ($item["status"] === 'active') : ?>
+                            <a href="index.php?act=update-tuyen-sinh&year=<?= htmlspecialchars($item["year"]) ?>" class="btn btn-warning">Update</a>
+                          <?php endif; ?>
+
+                          <!-- Hiển thị nút Đóng chỉ khi status là 'active' -->
+                          <?php if ($item["status"] === 'active') : ?>
+                            <a href="index.php?act=close-tuyen-sinh&year=<?= htmlspecialchars($item["year"]) ?>" class="btn btn-secondary" onclick="return confirm('Bạn có chắc muốn đóng?')">Đóng</a>
+                          <?php endif; ?>
+
+                          <!-- Hiển thị nút Mở chỉ khi status là 'inactive' và chương trình chưa hết hạn -->
+                          <?php if ($item["status"] === 'inactive' && !isExpired($item["end_date"])) : ?>
+                            <a href="index.php?act=open-tuyen-sinh&year=<?= htmlspecialchars($item["year"]) ?>" class="btn btn-success" onclick="return confirm('Bạn có chắc muốn mở?')">Mở</a>
+                          <?php endif; ?>
+                          <a href="index.php?act=delete-tuyen-sinh&year=<?= htmlspecialchars($item["year"]) ?>" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa?')">Xóa</a>
+                        </td>
+
+                      <?php endforeach; ?>
                   </tbody>
-
                 </table>
+
               </div>
             </div>
           </div>
@@ -162,22 +151,12 @@
   </a>
 
   <!-- Logout Modal-->
-  <div
-    class="modal fade"
-    id="logoutModal"
-    tabindex="-1"
-    role="dialog"
-    aria-labelledby="exampleModalLabel"
-    aria-hidden="true">
+  <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="exampleModalLabel">Ready to Leave?</h5>
-          <button
-            class="close"
-            type="button"
-            data-dismiss="modal"
-            aria-label="Close">
+          <button class="close" type="button" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">×</span>
           </button>
         </div>
@@ -185,10 +164,7 @@
           Select "Logout" below if you are ready to end your current session.
         </div>
         <div class="modal-footer">
-          <button
-            class="btn btn-secondary"
-            type="button"
-            data-dismiss="modal">
+          <button class="btn btn-secondary" type="button" data-dismiss="modal">
             Cancel
           </button>
           <a class="btn btn-primary" href="login.html">Logout</a>

@@ -10,8 +10,9 @@
   <meta name="description" content="" />
   <meta name="author" content="" />
 
-  <title>SB Admin 2 - Tables</title>
-
+  <title>Admin- mở cổng tuyển sinh</title>
+  <!-- Link bottrap selectoption để search trong combobox -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/css/bootstrap-select.min.css">
   <!-- Custom fonts for this template -->
   <link
     href="view/vendor/fontawesome-free/css/all.min.css"
@@ -48,7 +49,7 @@
         <!-- Begin Page Content -->
         <div class="container-fluid">
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Thêm mới user</h1>
+          <h1 class="h3 mb-2 text-gray-800">Mở cổng tuyển sinh</h1>
           <!-- <p class="mb-4">
               DataTables is a third party plugin that is used to generate the
               demo table below. For more information about DataTables, please
@@ -62,7 +63,7 @@
           <div class="card shadow mb-4">
             <div class="card-header py-3">
               <h6 class="m-0 font-weight-bold text-primary">
-                Thêm user
+                <!-- Thêm thẻ Tag mới -->
               </h6>
             </div>
             <div class="card-body">
@@ -78,36 +79,50 @@
                 </div>
               <?php endif; ?>
 
-              <form action="" method="POST">
-                <div class="mb-3 mt-3">
-                  <label for="full_name" class="form-lable">Full Name: </label>
-                  <input type="text" class="form-control" id="full_name" name="full_name"
-                    value="<?= isset($_SESSION['data_err']['full_name']) ? htmlspecialchars($_SESSION['data_err']['full_name'], ENT_QUOTES, 'UTF-8') : '' ?>">
-                </div>
-                <div class="mb-3 mt-3">
-                  <label for="email" class="form-lable">Email: </label>
-                  <input type="email" class="form-control" id="email" name="email"
-                    value="<?= isset($_SESSION['data_err']['email']) ? htmlspecialchars($_SESSION['data_err']['email'], ENT_QUOTES, 'UTF-8') : '' ?>">
-                </div>
-                <!-- <div class="mb-3 mt-3">
-                        <label for="username" class="form-lable">username: </label>
-                        <input type="text"  class="form-control" id="username" name="username">
-                    </div> -->
-                <div class="mb-3 mt-3">
-                  <label for="password" class="form-lable">password: </label>
-                  <input type="password" class="form-control" id="password" name="password">
-                </div>
-                <div class="mb-3 mt-3">
-                  <label for="role" class="form-lable">Vai trò: </label>
-                  <select name="role" id="role" class="form-control">
-                    <option value="admin">Admin</option>
-                    <option value="teacher">Người kiểm duyệt</option>
-                    <option value="student">User</option>
+              <div class="container mt-5">
+                <h2> </h2>
+                <a href="index.php?act=open-multiple" class="btn btn-info">Mở cùng lúc nhiều ngành tuyển sinh</a>
+                <br>
+                <form action="" method="post" enctype="multipart/form-data">
+                  <div class="form-group">
+                    <label for="user_id">Chọn ngành sẽ mở</label>
+                    <select class="selectpicker form-control" id="user_id" name="user_id" data-live-search="true" required>
+                      <option value="">Chọn ngành sẽ mở...</option>
+                      <?php foreach ($MajorsList as $item): ?>
+                        <option value="<?= htmlspecialchars($item['id']) ?>">
+                          <?= htmlspecialchars($item['industry_code']) ?> - <?= htmlspecialchars($item['ten_nganh']) ?>
+                        </option>
+                      <?php endforeach; ?>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="program_name">Tên chương trình tuyển sinh</label>
+                    <input type="text" class="form-control" id="program_name" name="program_name" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="start_date">Ngày bắt đầu</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="duration">Thời gian (tháng)</label>
+                    <select class="form-control" id="duration" name="duration" onchange="calculateEndDate()" required>
+                      <option value="">Chọn thời gian...</option>
+                      <option value="2">2 tháng</option>
+                      <option value="3">3 tháng</option>
+                      <option value="4">4 tháng</option>
+                      <!-- Thêm các tùy chọn khác nếu cần -->
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="end_date">Ngày kết thúc</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date">
+                  </div>
+                  <div class="form-grou">
 
-                  </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </form>
+                  </div>
+                  <button type="submit" class="btn btn-primary">Mở cổng tuyển sinh</button>
+                </form>
+              </div>
               <?php unset($_SESSION['data_err']); ?>
             </div>
           </div>
@@ -172,6 +187,9 @@
   <!-- Core plugin JavaScript-->
   <script src="view/vendor/jquery-easing/jquery.easing.min.js"></script>
 
+  <!-- Bootstrap Select JavaScript trong combobox select option -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.18/js/bootstrap-select.min.js"></script>
+
   <!-- Custom scripts for all pages-->
   <script src="view/js/sb-admin-2.min.js"></script>
 
@@ -181,6 +199,38 @@
 
   <!-- Page level custom scripts -->
   <script src="view/js/demo/datatables-demo.js"></script>
+
+  <script>
+    $(document).ready(function() {
+      // Xử lý khi input file thay đổi
+      $('#avatar').change(function() {
+        var input = this;
+        var url = URL.createObjectURL(input.files[0]);
+        $('#avatar-preview').attr('src', url).show();
+      });
+    });
+  </script>
+  <script>
+    function calculateEndDate() {
+      const duration = document.getElementById('duration').value;
+      const startDateInput = document.getElementById('start_date');
+      const endDateInput = document.getElementById('end_date');
+
+      if (startDateInput.value && duration) {
+        const startDate = new Date(startDateInput.value);
+        const endDate = new Date(startDate);
+        endDate.setMonth(startDate.getMonth() + parseInt(duration));
+
+        const year = endDate.getFullYear();
+        const month = String(endDate.getMonth() + 1).padStart(2, '0');
+        const day = String(endDate.getDate()).padStart(2, '0');
+
+        endDateInput.value = `${year}-${month}-${day}`;
+      } else {
+        endDateInput.value = '';
+      }
+    }
+  </script>
 </body>
 
 </html>

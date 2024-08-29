@@ -15,7 +15,7 @@ function create_user($conn)
             $email = mysqli_real_escape_string($conn, $_POST["email"]);
             $full_name = mysqli_real_escape_string($conn, $_POST["full_name"]);
             $hashpassword = password_hash(mysqli_real_escape_string($conn, $_POST["password"]), PASSWORD_DEFAULT); // Mã hóa mật khẩu
-            $role = 0;
+            $role = "student";
             $password = isset($_POST['password']) ? $_POST['password'] : '';
             $repeat_password = $_POST["repeat_password"];
             $data = [

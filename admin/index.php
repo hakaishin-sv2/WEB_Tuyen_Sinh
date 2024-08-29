@@ -12,15 +12,14 @@ require_file(PATH_MODEL_ADMIN);
 // Kiểm tra xem người dùng đã đăng nhập chưa
 $act = isset($_GET["act"]) ? $_GET["act"] : '';
 
-if (!isset($_SESSION["user"]) || empty($_SESSION["user"]) || (isset($_SESSION["user"]["role"]) && $_SESSION["user"]["role"] == 0)) {
-    // Nếu người dùng chưa đăng nhập, có session user role = 0 và không phải đang truy cập trang login, chuyển hướng đến trang login
+if (!isset($_SESSION["user"]) || empty($_SESSION["user"]) || (isset($_SESSION["user"]["role"]) && $_SESSION["user"]["role"] !== "admin")) {
     if ($act !== 'login') {
         header('Location: index.php?act=login');
-        exit(); 
+        exit();
     }
 }
-
-// Điều hướng URL
+// tự động update nếu hết hạn xét tuyển đưa status ở bảng program về inactive
+updateExpiredPrograms($conn);
 switch ($act) {
     case 'rigister':
         break;
@@ -33,193 +32,226 @@ switch ($act) {
     case 'users':
         getListAll($conn);
         break;
-   case 'user-detail':
-    if (isset($_GET['id'])) {
-        getUserDetail($conn, $_GET['id']);
-    } else {
-        echo "Không có thông tin chi tiết người dùng vì thiếu tham số 'id' trong URL.";
-        require_once PATH_VIEW_ADMIN . '404.php';
-    }
-    break;
+    case 'user-detail':
+        if (isset($_GET['id'])) {
+            getUserDetail($conn, $_GET['id']);
+        } else {
+            echo "Không có thông tin chi tiết người dùng vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+        break;
 
     case 'user-create':
         UserCreate($conn);
         break;
     case 'user-update':
         if (isset($_GET['id'])) {
-            updateUser($conn,$_GET['id']);
+            updateUser($conn, $_GET['id']);
         } else {
             echo "Không có thông tin chi tiết người dùng vì thiếu tham số 'id' trong URL.";
             require_once PATH_VIEW_ADMIN . '404.php';
         }
-      
+
         break;
     case 'user-delete':
         if (isset($_GET['id'])) {
-            deleteUser($conn,$_GET['id']);
+            deleteUser($conn, $_GET['id']);
         } else {
             echo "Không có thông tin chi tiết người dùng vì thiếu tham số 'id' trong URL.";
             require_once PATH_VIEW_ADMIN . '404.php';
         }
-      
-        break;
- 
-    // CATEGORY
-    case 'categories':
-        getCategoryListAll($conn);
-        break;
-   case 'category-detail':
-    if (isset($_GET['id'])) {
-        getcategoryDetail($conn, $_GET['id']);
-    } else {
-        echo "Không có thông tin chi tiết người dùng vì thiếu tham số 'id' trong URL.";
-        require_once PATH_VIEW_ADMIN . '404.php';
-    }
-    break;
 
-    case 'category-create':
-        categoryCreate($conn);
         break;
-    case 'category-update':
+
+        // Quản lý ngành
+    case 'nganh-xet-tuyen-list':
+        getAlllistNganh($conn);
+        break;
+    case 'nganh-xet-tuyen-detail':
         if (isset($_GET['id'])) {
-            categoryUpdate($conn, $_GET['id']);
+            get_Nganh_item($conn, $_GET['id']);
         } else {
             echo "Không có thông tin chi tiết người dùng vì thiếu tham số 'id' trong URL.";
             require_once PATH_VIEW_ADMIN . '404.php';
         }
-      
-        break;
-    case 'category-delete':
-        if (isset($_GET['id'])) {
-            deleteCategory($conn,$_GET['id']);
-        } else {
-            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
-            require_once PATH_VIEW_ADMIN . '404.php';
-        }
-      
-        break;
-        
-    // THẺ TAG
-
-    case 'tags':
-        getTagListAll($conn);
-        break;
-   case 'tag-detail':
-    if (isset($_GET['id'])) {
-        getTagDetail($conn, $_GET['id']);
-    } else {
-        echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
-        require_once PATH_VIEW_ADMIN . '404.php';
-    }
-    break;
-
-    case 'tag-create':
-        TagCreate($conn);
-        break;
-    case 'tag-update':
-        if (isset($_GET['id'])) {
-            updateTag($conn,$_GET['id']);
-        } else {
-            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
-            require_once PATH_VIEW_ADMIN . '404.php';
-        }
-      
-        break;
-    case 'tag-delete':
-        if (isset($_GET['id'])) {
-            deleteTag($conn,$_GET['id']);
-        } else {
-            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
-            require_once PATH_VIEW_ADMIN . '404.php';
-        }
-      
         break;
 
-    // Author
-
-    case 'authors':
-        getAuthorsListAll($conn);
+    case 'nganh-xet-tuyen-create':
+        Create_nganh_xettuyen($conn);
         break;
-   case 'author-detail':
-    if (isset($_GET['id'])) {
-        getAuthorDetail($conn, $_GET['id']);
-    } else {
-        echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
-        require_once PATH_VIEW_ADMIN . '404.php';
-    }
-    break;
-
-    case 'author-create':
-         authorCreate($conn);
-         break;
-    case 'author-update':
+    case 'nganh-xet-tuyen-update':
         if (isset($_GET['id'])) {
-            authorUpdate($conn,$_GET['id']);
+            UpdateMajor($conn, $_GET['id']);
+        } else {
+            echo "Không có thông tin chi tiết người dùng vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+
+        break;
+    case 'nganh-xet-tuyen-delete':
+        if (isset($_GET['id'])) {
+            deleteNganhXetTuyen($conn, $_GET['id']);
         } else {
             echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
             require_once PATH_VIEW_ADMIN . '404.php';
         }
-      
-        break;
-    case 'author-delete':
-        if (isset($_GET['id'])) {
-            deleteAuthor($conn,$_GET['id']);
-        } else {
-            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
-            require_once PATH_VIEW_ADMIN . '404.php';
-        }
-      
+
         break;
 
-     // POST mânger
+        // Khối xét tuyển
 
-    case 'posts':
-        getAlllistPost($conn);
+    case 'exam-block-list':
+        getExamBlockListAll($conn);
         break;
-        
-    case 'post-detail':
-    if (isset($_GET['id'])) {
-        get_Postd_item($conn, $_GET['id']);
-    } else {
-        echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
-        require_once PATH_VIEW_ADMIN . '404.php';
-    }
-    break;
-    case 'post-approve':
+    case 'exam-block-detail':
         if (isset($_GET['id'])) {
-            Phe_duyet_Post($conn, $_GET['id']);
+            get_exam_block_Detail($conn, $_GET['id']);
         } else {
             echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
             require_once PATH_VIEW_ADMIN . '404.php';
         }
         break;
-    case 'post-create':
-        PostCreate($conn);
-         break;
-    case 'post-update':
-        if (isset($_GET['id'])) {
-            PostUpdate($conn,$_GET['id']);
-        } else {
-            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
-            require_once PATH_VIEW_ADMIN . '404.php';
-        }
-      
+
+    case 'exam-block-create':
+        exam_blockCreate($conn);
         break;
-    case 'post-delete':
+    case 'exam-block-update':
         if (isset($_GET['id'])) {
-            deletePost($conn,$_GET['id']);
+            update_exam_block($conn, $_GET['id']);
         } else {
             echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
             require_once PATH_VIEW_ADMIN . '404.php';
         }
-      
+
+        break;
+    case 'exam-block-delete':
+        if (isset($_GET['id'])) {
+            // deleteTag($conn, $_GET['id']);
+            echo "Không thể xóa.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+
+        break;
+
+        // Phân công giáo viên duyệt hồ sơ
+
+    case 'assign-teachers':
+        getTeacherToMajorList($conn);
+        break;
+
+    case 'assign-teacher-detail':
+        if (isset($_GET['id'])) {
+            getTeacherToMajorDetail($conn, $_GET['id']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+        break;
+
+    case 'assign-teacher-create':
+        assignTeacherToMajor($conn);
+        break;
+    case 'assign-teacher-update':
+        if (isset($_GET['id'])) {
+            assignTeacherToMajorUpdate($conn, $_GET['id']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+
+        break;
+    case 'assign-teacher-delete':
+        if (isset($_GET['id'])) {
+            deleteTeacherAssignments($conn, $_GET['id']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+
+        break;
+
+        // Tuyển sinh
+    case 'open-application': // mỏ cổng tuyển sinh
+        mo_cong_tuyen_sinh_one_create($conn);
+        break;
+    case 'list-open-majors': // danh cách năm tuyển sinh 
+        getListCacNamXetTuyen($conn);
+        break;
+    case 'close-tuyen-sinh': // các cổng tuyển sinh chưa mở / đã đóng
+        if (isset($_GET['year'])) {
+            close_tuyen_sinh($conn, $_GET['year']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'year' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+        break;
+
+    case 'open-tuyen-sinh': // các ngành đang được mở tuyển sinh
+        if (isset($_GET['year'])) {
+            open_tuyen_sinh($conn, $_GET['year']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'year' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+        break;
+    case 'update-tuyen-sinh': // update lại các ngành tuyển sinh
+        mo_cong_tuyen_sinh_one_create($conn);
+        break;
+    case 'delete-tuyen-sinh':
+        if (isset($_GET['year'])) {
+            deleteProgramByYear($conn, $_GET['year']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+
+        break;
+    case 'show-tuyen-sinh':
+        if (isset($_GET['year'])) {
+            chi_tiet_tuyen_sinh_by_year($conn, $_GET['year']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'year' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+
+        break;
+        // Ẩn hiện nhận hay ngưng nhận hồ sơ của từng ngành
+    case 'an-nop-ho-so':
+        if (isset($_GET['id_program_major'])) {
+            AnHoSoTheoNganh($conn, $_GET['id_program_major'], $_GET['year']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+
+        break;
+    case 'hien-nop-ho-so':
+        if (isset($_GET['id_program_major'])) {
+            hienHoSoTheoNganh($conn, $_GET['id_program_major'], $_GET['year']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+
+        break;
+        // Nhập điểm trúng tuyển
+    case 'nhap-diem-trung-tuyen':
+        if (isset($_GET['id_program_major'])) {
+            NhapDiemTrungTuyen($conn, $_GET['id_program_major']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+
         break;
     case 'test':
         TestIndex($conn);
         break;
     default:
-    MainIndex();
+        MainIndex();
         break;
 }
 require_once '../Commons/disconnect_db.php';
-?>

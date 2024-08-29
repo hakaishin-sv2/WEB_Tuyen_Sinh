@@ -10,7 +10,7 @@
   <meta name="description" content="" />
   <meta name="author" content="" />
 
-  <title>SB Admin 2 - Tables</title>
+  <title>SB Admin 2 - Manager Authorc</title>
 
   <!-- Custom fonts for this template -->
   <link
@@ -48,7 +48,7 @@
         <!-- Begin Page Content -->
         <div class="container-fluid">
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Thêm mới user</h1>
+          <h1 class="h3 mb-2 text-gray-800">Quản lý danh mục</h1>
           <!-- <p class="mb-4">
               DataTables is a third party plugin that is used to generate the
               demo table below. For more information about DataTables, please
@@ -62,53 +62,80 @@
           <div class="card shadow mb-4">
             <div class="card-header py-3">
               <h6 class="m-0 font-weight-bold text-primary">
-                Thêm user
+                DataTables Example
               </h6>
             </div>
             <div class="card-body">
-
-              <?php if (isset($_SESSION["errors"])): ?>
-                <div class="alert alert-danger">
-                  <ul>
-                    <?php foreach ($_SESSION["errors"] as $error): ?>
-                      <li><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></li>
-                    <?php endforeach; ?>
-                    <?php unset($_SESSION["errors"]); ?>
-                  </ul>
+              <?php if (isset($_SESSION["success"])): ?>
+                <div class="alert alert-success">
+                  <?= $_SESSION["success"]   ?>
                 </div>
+                <?php unset($_SESSION["success"]);  ?>
               <?php endif; ?>
+              <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                  <thead>
+                    <tr>
 
-              <form action="" method="POST">
-                <div class="mb-3 mt-3">
-                  <label for="full_name" class="form-lable">Full Name: </label>
-                  <input type="text" class="form-control" id="full_name" name="full_name"
-                    value="<?= isset($_SESSION['data_err']['full_name']) ? htmlspecialchars($_SESSION['data_err']['full_name'], ENT_QUOTES, 'UTF-8') : '' ?>">
-                </div>
-                <div class="mb-3 mt-3">
-                  <label for="email" class="form-lable">Email: </label>
-                  <input type="email" class="form-control" id="email" name="email"
-                    value="<?= isset($_SESSION['data_err']['email']) ? htmlspecialchars($_SESSION['data_err']['email'], ENT_QUOTES, 'UTF-8') : '' ?>">
-                </div>
-                <!-- <div class="mb-3 mt-3">
-                        <label for="username" class="form-lable">username: </label>
-                        <input type="text"  class="form-control" id="username" name="username">
-                    </div> -->
-                <div class="mb-3 mt-3">
-                  <label for="password" class="form-lable">password: </label>
-                  <input type="password" class="form-control" id="password" name="password">
-                </div>
-                <div class="mb-3 mt-3">
-                  <label for="role" class="form-lable">Vai trò: </label>
-                  <select name="role" id="role" class="form-control">
-                    <option value="admin">Admin</option>
-                    <option value="teacher">Người kiểm duyệt</option>
-                    <option value="student">User</option>
+                      <th>Avatar</th>
+                      <th>Họ Tên</th>
+                      <th>Email</th>
+                      <th>Phụ trách</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tfoot>
+                    <tr>
 
-                  </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </form>
-              <?php unset($_SESSION['data_err']); ?>
+                      <th>Avatar</th>
+                      <th>Họ Tên</th>
+                      <th>Email</th>
+                      <th>Phụ trách</th>
+                      <th>Action</th>
+                    </tr>
+                  </tfoot>
+                  <tbody>
+                    <?php //print_r($list);
+                    foreach ($list as $item): ?>
+                      <tr>
+
+                        <td>
+                          <?php if (!empty($item["img_user"])): ?>
+                            <img src="<?= "../" . htmlspecialchars($item["img_user"]) ?>" alt="img_user" class="rounded-circle" style="width: 100px; height: 100px;">
+                          <?php else: ?>
+                            <span>No Avatar</span>
+                          <?php endif; ?>
+                        </td>
+                        <td><?= htmlspecialchars($item["full_name"]) ?></td>
+                        <td><?= htmlspecialchars($item["email"]) ?></td>
+                        <td>
+                          <?php
+                          if (!empty($item["majors_responsible"])) {
+                            // Sử dụng explode để tách chuỗi 'exam_blocks' thành mảng, sử dụng dấu '+' làm ký tự phân tách
+                            $majors_responsible = explode('+', htmlspecialchars($item["majors_responsible"]));
+                            $i = 1;
+                            // Duyệt qua mỗi phần tử trong mảng và hiển thị trên một dòng riêng biệt
+                            foreach ($majors_responsible as $block) {
+                              echo $i . "_" . htmlspecialchars($block) . "<br>"; // Hiển thị mỗi tổ hợp trên một dòng
+                              $i++;
+                            }
+                          } else {
+                            echo "Không có khối xét tuyển"; // Trường hợp không có dữ liệu
+                          }
+
+                          ?>
+                        </td>
+                        <td>
+                          <a href="index.php?act=assign-teacher-detail&id=<?= htmlspecialchars($item["teacher_id"]) ?>" class="btn btn-info">Show</a>
+                          <a href="index.php?act=assign-teacher-update&id=<?= htmlspecialchars($item["teacher_id"]) ?>" class="btn btn-warning">Update</a>
+                          <a href="index.php?act=assign-teacher-delete&id=<?= htmlspecialchars($item["teacher_id"]) ?>" class="btn btn-danger" onclick="return confirm('Bạn có chắc muốn xóa? Và người này sẽ về quyền Member')">Xóa</a>
+                        </td>
+                      </tr>
+                    <?php endforeach; ?>
+                  </tbody>
+                </table>
+
+              </div>
             </div>
           </div>
         </div>

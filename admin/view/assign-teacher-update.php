@@ -48,7 +48,7 @@
         <!-- Begin Page Content -->
         <div class="container-fluid">
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Thêm mới user</h1>
+          <h1 class="h3 mb-2 text-gray-800">Update</h1>
           <!-- <p class="mb-4">
               DataTables is a third party plugin that is used to generate the
               demo table below. For more information about DataTables, please
@@ -57,16 +57,19 @@
                 >official DataTables documentation</a
               >.
             </p> -->
-
+          <?php
+          // print_r($user);
+          // print_r($NganhGiaoVienduocduyethoso);
+          // print_r($MajorsList) 
+          ?>
           <!-- DataTales Example -->
           <div class="card shadow mb-4">
             <div class="card-header py-3">
               <h6 class="m-0 font-weight-bold text-primary">
-                Thêm user
+                Update Giáo viên duyệt hồ sơ
               </h6>
             </div>
             <div class="card-body">
-
               <?php if (isset($_SESSION["errors"])): ?>
                 <div class="alert alert-danger">
                   <ul>
@@ -77,38 +80,56 @@
                   </ul>
                 </div>
               <?php endif; ?>
+              <div class="container mt-5">
+                <form action="" method="post" enctype="multipart/form-data">
+                  <div class="form-group">
+                    <label for="user_id">Chọn Người Dùng</label>
+                    <select class="selectpicker form-control" id="user_id" name="user_id" data-live-search="true" required>
+                      <option value="<?= htmlspecialchars($user['id']) ?>" selected>
+                        <?= htmlspecialchars($user['full_name']) ?> - Email: <?= htmlspecialchars($user['email']) ?>
+                      </option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="majors">Chọn ngành:</label>
+                    <div class="row">
+                      <?php  // Chuyển đổi mảng assignedMajors thành mảng đơn giản chỉ chứa các major_id
+                      $assignedMajorIds = array_column($NganhGiaoVienduocduyethoso, 'major_id');
+                      foreach ($MajorsList as $major) : ?>
+                        <div class="col-md-6 mb-3">
+                          <div class="form-check">
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              name="majors[]"
+                              id="major_<?= htmlspecialchars($major['industry_code']) ?>"
+                              value="<?= htmlspecialchars($major['id']) ?>"
+                              <?php if (in_array($major['id'], $assignedMajorIds)) echo 'checked'; ?>>
+                            <label class="form-check-label" for="major_<?= htmlspecialchars($major['industry_code']) ?>">
+                              <?= htmlspecialchars($major['industry_code']) ?> - <?= htmlspecialchars($major['ten_nganh']) ?>
+                            </label>
+                          </div>
+                        </div>
+                      <?php endforeach; ?>
+                    </div>
+                  </div>
 
-              <form action="" method="POST">
-                <div class="mb-3 mt-3">
-                  <label for="full_name" class="form-lable">Full Name: </label>
-                  <input type="text" class="form-control" id="full_name" name="full_name"
-                    value="<?= isset($_SESSION['data_err']['full_name']) ? htmlspecialchars($_SESSION['data_err']['full_name'], ENT_QUOTES, 'UTF-8') : '' ?>">
-                </div>
-                <div class="mb-3 mt-3">
-                  <label for="email" class="form-lable">Email: </label>
-                  <input type="email" class="form-control" id="email" name="email"
-                    value="<?= isset($_SESSION['data_err']['email']) ? htmlspecialchars($_SESSION['data_err']['email'], ENT_QUOTES, 'UTF-8') : '' ?>">
-                </div>
-                <!-- <div class="mb-3 mt-3">
-                        <label for="username" class="form-lable">username: </label>
-                        <input type="text"  class="form-control" id="username" name="username">
-                    </div> -->
-                <div class="mb-3 mt-3">
-                  <label for="password" class="form-lable">password: </label>
-                  <input type="password" class="form-control" id="password" name="password">
-                </div>
-                <div class="mb-3 mt-3">
-                  <label for="role" class="form-lable">Vai trò: </label>
-                  <select name="role" id="role" class="form-control">
-                    <option value="admin">Admin</option>
-                    <option value="teacher">Người kiểm duyệt</option>
-                    <option value="student">User</option>
+                  <!-- <div class="form-group">
+                    <img id="avatar-preview" src="#" alt="Ảnh Avatar" style="max-width: 200px; max-height: 200px; display: none;">
+                  </div>
+                  <div class="form-group">
+                    <label for="avatar">Chọn Ảnh Avatar</label>
+                    <input type="file" class="form-control-file" id="avatar" name="avatar" accept="image/*">
+                    <small class="form-text text-muted">Chọn một file ảnh để làm Avatar.</small>
+                  </div> -->
+                  <!-- <div class="form-group">
+                    <label for="bio">Tiểu Sử</label>
+                    <textarea class="form-control" id="bio" name="bio" rows="3" required></textarea>
+                  </div> -->
 
-                  </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </form>
-              <?php unset($_SESSION['data_err']); ?>
+                  <button type="submit" class="btn btn-primary">Update quyền kiểm duyệt hồ sơ</button>
+                </form>
+              </div>
             </div>
           </div>
         </div>
@@ -159,7 +180,7 @@
             data-dismiss="modal">
             Cancel
           </button>
-          <a class="btn btn-primary" href="login.html">Logout</a>
+          <a class="btn btn-primary" href="index.php?act=login">Logout</a>
         </div>
       </div>
     </div>

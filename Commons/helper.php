@@ -104,11 +104,11 @@ function validate_Create_User($data, $conn)
     }
 
     // Kiểm tra Vai trò
-    if (!isset($data["role"])) {
-        $errors[] = "Cần chọn Vai trò!";
-    } elseif (!in_array($data["role"], [0, 1, 2, 3])) {
-        $errors[] = "Vai trò không hợp lệ! Vai trò hợp lệ là 0, 1 hoặc 2.";
-    }
+    // if (!isset($data["role"])) {
+    //     $errors[] = "Cần chọn Vai trò!";
+    // } elseif (!in_array($data["role"], [0, 1, 2, 3])) {
+    //     $errors[] = "Vai trò không hợp lệ! Vai trò hợp lệ là 0, 1 hoặc 2.";
+    // }
 
     return $errors;
 }

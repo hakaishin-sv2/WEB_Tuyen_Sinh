@@ -48,7 +48,7 @@
         <!-- Begin Page Content -->
         <div class="container-fluid">
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Thêm mới user</h1>
+          <h1 class="h3 mb-2 text-gray-800">Tables</h1>
           <!-- <p class="mb-4">
               DataTables is a third party plugin that is used to generate the
               demo table below. For more information about DataTables, please
@@ -62,53 +62,55 @@
           <div class="card shadow mb-4">
             <div class="card-header py-3">
               <h6 class="m-0 font-weight-bold text-primary">
-                Thêm user
+                Chi tiết bài Post
               </h6>
             </div>
             <div class="card-body">
+              <table class="table">
+                <tr>
+                  <td>Trường dữ liệu</td>
+                  <td>Dữ liệu</td>
+                </tr>
+                <?php ?>
+                <?php if (!empty($post_dto_item)): ?>
+                  <tr>
+                    <td>ID</td>
+                    <td><?php echo htmlspecialchars($post_dto_item['major_id']); ?></td>
+                  </tr>
+                  <tr>
+                    <td>Industry Code</td>
+                    <td><?php echo htmlspecialchars($post_dto_item['industry_code']); ?></td>
+                  </tr>
+                  <tr>
+                    <td>Major Name</td>
+                    <td><?php echo htmlspecialchars($post_dto_item['major_name']); ?></td>
+                  </tr>
+                  <tr>
+                    <td>Exam Blocks</td>
+                    <td>
+                      <?php
+                      // Tách chuỗi exam_blocks thành mảng và hiển thị từng tổ hợp trên một dòng
+                      $exam_blocks = explode('+', htmlspecialchars($post_dto_item['exam_blocks']));
+                      foreach ($exam_blocks as $block) {
+                        echo htmlspecialchars($block) . "<br>"; // Hiển thị mỗi tổ hợp trên một dòng
+                      }
+                      ?>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Description</td>
+                    <td><?php echo htmlspecialchars($post_dto_item['description']); ?></td>
+                  </tr>
+                <?php else: ?>
+                  <tr>
+                    <td colspan="2">Không có dữ liệu để hiển thị.</td>
+                  </tr>
+                <?php endif; ?>
 
-              <?php if (isset($_SESSION["errors"])): ?>
-                <div class="alert alert-danger">
-                  <ul>
-                    <?php foreach ($_SESSION["errors"] as $error): ?>
-                      <li><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></li>
-                    <?php endforeach; ?>
-                    <?php unset($_SESSION["errors"]); ?>
-                  </ul>
-                </div>
-              <?php endif; ?>
 
-              <form action="" method="POST">
-                <div class="mb-3 mt-3">
-                  <label for="full_name" class="form-lable">Full Name: </label>
-                  <input type="text" class="form-control" id="full_name" name="full_name"
-                    value="<?= isset($_SESSION['data_err']['full_name']) ? htmlspecialchars($_SESSION['data_err']['full_name'], ENT_QUOTES, 'UTF-8') : '' ?>">
-                </div>
-                <div class="mb-3 mt-3">
-                  <label for="email" class="form-lable">Email: </label>
-                  <input type="email" class="form-control" id="email" name="email"
-                    value="<?= isset($_SESSION['data_err']['email']) ? htmlspecialchars($_SESSION['data_err']['email'], ENT_QUOTES, 'UTF-8') : '' ?>">
-                </div>
-                <!-- <div class="mb-3 mt-3">
-                        <label for="username" class="form-lable">username: </label>
-                        <input type="text"  class="form-control" id="username" name="username">
-                    </div> -->
-                <div class="mb-3 mt-3">
-                  <label for="password" class="form-lable">password: </label>
-                  <input type="password" class="form-control" id="password" name="password">
-                </div>
-                <div class="mb-3 mt-3">
-                  <label for="role" class="form-lable">Vai trò: </label>
-                  <select name="role" id="role" class="form-control">
-                    <option value="admin">Admin</option>
-                    <option value="teacher">Người kiểm duyệt</option>
-                    <option value="student">User</option>
-
-                  </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-              </form>
-              <?php unset($_SESSION['data_err']); ?>
+              </table>
+              <a href="index.php?act=nganh-xet-tuyen-list" class="btn btn-danger">Quay lại</a>
+              <a href="index.php?act=nganh-xet-tuyen-update&id=<?= isset($_GET['id']) ? $_GET['id'] : '' ?>" class="btn btn-warning">Update</a>
             </div>
           </div>
         </div>

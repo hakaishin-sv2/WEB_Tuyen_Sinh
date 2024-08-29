@@ -70,6 +70,7 @@
           <span class="bi-person"></span> <!-- Icon đại diện cho người dùng -->
         </button>
         <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+          <li><a class="dropdown-item" href="index.php?act=profile">Profile</a></li>
           <li><a class="dropdown-item" href="index.php?act=change-password">Đổi mật khẩu</a></li>
           <li><a class="dropdown-item" href="index.php?act=logout">Logout</a></li>
           <?php if (isset($_SESSION["user"]) && !empty($_SESSION["user"])) : ?>

@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin 2 - Login</title>
+    <title>Login</title>
 
     <!-- Custom fonts for this template-->
     <link href="view/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -51,16 +51,16 @@
                                             </ul>
                                         </div>
                                     <?php endif; ?>
-                                    <form class="user" method="post" >
+                                    <form class="user" method="post">
                                         <div class="form-group">
                                             <input type="email" class="form-control form-control-user"
                                                 id="exampleInputEmail" aria-describedby="emailHelp"
-                                                placeholder="Enter Email Address..." name ="email" 
+                                                placeholder="Enter Email Address..." name="email"
                                                 value="<?= isset($_SESSION['data_err']["email"]) ? htmlspecialchars($_SESSION['data_err']["email"]) : '' ?>">
                                         </div>
                                         <div class="form-group">
                                             <input type="password" class="form-control form-control-user"
-                                                id="exampleInputPassword" placeholder="Password" name ="password"  
+                                                id="exampleInputPassword" placeholder="Password" name="password"
                                                 value="<?= isset($_SESSION['data_err']["password"]) ? htmlspecialchars($_SESSION['data_err']["password"]) : '' ?>">
                                         </div>
                                         <div class="form-group">
@@ -72,7 +72,7 @@
                                         </div>
                                         <?php unset($_SESSION['data_err']); ?>
                                         <button type="submit" class="btn btn-primary btn-user btn-block">Login</button>
-                                        
+
                                         <hr>
                                         <a href="index.php?" class="btn btn-google btn-user btn-block">
                                             <i class="fab fa-google fa-fw"></i> Login with Google
