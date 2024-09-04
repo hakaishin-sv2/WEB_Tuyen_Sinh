@@ -183,6 +183,7 @@
                         Cá nhân
                     </a>
                     <div class="dropdown-menu" aria-labelledby="servicesDropdown">
+                        <a class="dropdown-item" href="index.php?act=list-nop-ho-so-ca-nhan">Hồ sơ đã nộp</a>
                         <a class="dropdown-item" href="index.php?act=profile">Profile</a>
                         <a class="dropdown-item" href="index.php?act=change-password">Đổi mật khẩu</a>
                         <a class="dropdown-item" href="index.php?act=logout">Logout</a>

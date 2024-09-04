@@ -295,3 +295,121 @@ function hasSubmittedApplication($user_id, $program_id, $major_id, $conn)
     $stmt->close();
     return $row['count'] > 0;
 }
+
+// lấy ra các hồ sơ đã nộp
+function getlist_nop_ho_so_ca_nhan($user_id, $conn)
+{
+    // Chuẩn bị câu truy vấn SQL với sắp xếp theo năm giảm dần
+    $sql = "
+        SELECT 
+            p.year,
+            p.name as te_kytuyensinh,
+            a.id,
+            a.major_id,
+            a.created_at,
+            a.score,
+            a.teacher_review,
+            a.status,
+            m.industry_code,
+            m.ten_nganh
+        FROM 
+            applications a
+        JOIN 
+            programs p ON a.program_id = p.id
+        JOIN 
+            majors m ON a.major_id = m.id
+        WHERE 
+            a.user_id = ?
+        ORDER BY 
+            p.year DESC;  -- Sắp xếp theo năm giảm dần
+    ";
+
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $applications = [];
+        while ($row = $result->fetch_assoc()) {
+            $applications[] = [
+                'id' => $row['id'],
+                'major_id' => $row['major_id'],
+                'year' => $row['year'],
+                'te_kytuyensinh' => $row['te_kytuyensinh'],
+                'created_at' => $row['created_at'],
+                'score' => $row['score'],
+                'status' => $row['status'],
+                'industry_code' => $row['industry_code'],
+                'ten_nganh' => $row['ten_nganh'],
+                'teacher_review' => $row['teacher_review'],
+            ];
+        }
+
+        $stmt->close();
+        return $applications;
+    } else {
+        return null;
+    }
+}
+
+function getDetailApplicationById($id_hoso, $conn)
+{
+    $sql = "
+        SELECT 
+            p.year,
+            p.name as te_kytuyensinh,
+            a.id,
+            a.major_id,
+            a.created_at,
+            a.score,
+            a.status,
+            a.img_cccd,
+            a.img_hoc_ba,
+            a.phone,
+            a.address,
+            m.industry_code,
+            m.ten_nganh
+        FROM 
+            applications a
+        JOIN 
+            programs p ON a.program_id = p.id
+        JOIN 
+            majors m ON a.major_id = m.id
+        WHERE 
+            a.id = ?
+    ";
+
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param('i', $id_hoso);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $applicationDetail = $result->fetch_assoc();
+        } else {
+            $applicationDetail = null;
+        }
+
+        $stmt->close();
+        return $applicationDetail;
+    } else {
+        return null;
+    }
+}
+
+
+// xóa hồ sơ
+function deleteApplicationById($application_id, $conn)
+{
+    $sql = "DELETE FROM applications WHERE id = ?";
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param('i', $application_id);
+        if ($stmt->execute()) {
+            $stmt->close();
+            return true;
+        } else {
+            $stmt->close();
+            return false;
+        }
+    } else {
+        return false;
+    }
+}

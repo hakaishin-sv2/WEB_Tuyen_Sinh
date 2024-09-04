@@ -149,6 +149,11 @@
         .subject-input {
             margin-top: 10px;
         }
+
+        .thumbnail {
+            width: 200px;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -255,7 +260,7 @@
     <!-- Nội dung chi tiết -->
     <?php
 
-    //print_r($item);
+
     // PHP script để định nghĩa dữ liệu môn học
     $subjects = [];
 
@@ -277,17 +282,28 @@
     //     'C00' => ['Văn', 'Sử', 'Địa']
     // ];
 
+
     ?>
+
+
     <div class="container my-5">
 
         <!-- Form Nộp Hồ Sơ -->
         <section id="apply" class="my-5">
-            <h2 class="text-center mb-4">Nộp Hồ Sơ</h2>
+            <?php //print_r($application)
+            ?>
+            <h2 class="text-center mb-4">Update Hồ Sơ</h2>
             <div class="container">
                 <div class="form-section">
                     <div class="form-header">
-                        <h3>Ngành: <?= $item[0]["ten_nganh"]  ?></h3>
+                        <h3>Mã: <?= $application["industry_code"] ?> ngành: <?= $item[0]["ten_nganh"]  ?></h3>
                     </div>
+                    <?php
+
+                    if (isset($_SESSION["data"])) {
+                        //print_r($_SESSION["data"]);// kiểm tra các dữ liệu lỗi
+                    }
+                    ?>
                     <?php if (isset($_SESSION['errors'])): ?>
                         <div class="alert alert-danger">
                             <?php foreach ($_SESSION['errors'] as $error): ?>
@@ -314,40 +330,80 @@
                         </div>
                         <div class="form-group">
                             <label for="phone">Số Điện Thoại</label>
-                            <input type="number" class="form-control" id="phone" name="phone" placeholder="Nhập số điện thoại" value="<?= isset($_SESSION['data_errors']['phone']) ? htmlspecialchars($_SESSION['data_errors']['phone']) : '' ?>" required>
+                            <input type="number" class="form-control" id="phone" name="phone" placeholder="Nhập số điện thoại"
+                                value="<?= isset($application['phone']) ? "0" . htmlspecialchars($application['phone']) : '' ?>" required>
                         </div>
+
                         <!-- <div class="form-group">
                             <label for="dob">Ngày Sinh</label>
                             <input type="date" class="form-control" id="dob" name="dob" required>
                         </div> -->
                         <div class="form-group">
                             <label for="address">Địa Chỉ</label>
-                            <input type="text" class="form-control" id="address" name="address" placeholder="Nhập địa chỉ" value="<?= isset($_SESSION['data_errors']['address']) ? htmlspecialchars($_SESSION['data_errors']['address']) : '' ?>" required>
+                            <input type="text" class="form-control" id="address" name="address" placeholder="Nhập địa chỉ"
+                                value="<?= isset($application['address']) ?  htmlspecialchars($application['address']) : '' ?>" required>
+                        </div>
+                        <?php
+                        // decode vì trong database để jsson
+
+                        $img_hoc_ba = json_decode($application['img_hoc_ba'], true);
+                        $img_cccd = json_decode($application['img_cccd'], true);
+                        ?>
+                        <div class="form-group">
+                            <label style="font-weight: bold;">Ảnh CCCD đã tải lên:</label>
+                            <div>
+                                <?php if (is_array($img_cccd) && !empty($img_cccd)) : ?>
+                                    <?php foreach ($img_cccd as $img) : ?>
+                                        <a href="<?= htmlspecialchars($img) ?>" target="_blank">
+                                            <img src="<?= htmlspecialchars($img) ?>" alt="Ảnh CCCD" class="thumbnail mb-2">
+                                        </a>
+                                    <?php endforeach; ?>
+                                <?php else : ?>
+                                    <p>Không có ảnh CCCD nào được tải lên.</p>
+                                <?php endif; ?>
+                            </div>
                         </div>
                         <!-- Tải ảnh CCCD -->
                         <div class="form-group">
-                            <label for="cccd">Tải Lên Ảnh CCCD</label>
-                            <input type="file" class="form-control-file" id="cccd" name="cccd[]" accept=".jpg, .jpeg, .png" multiple required>
+                            <label for="cccd">Tải Lên Ảnh CCCD Mới</label>
+                            <input type="file" class="form-control-file" id="cccd" name="cccd[]" accept=".jpg, .jpeg, .png" multiple>
                         </div>
                         <div class="preview-container" id="cccd-preview"></div>
-
                         <!-- Tải học bạ -->
                         <div class="form-group">
-                            <label for="transcripts">Tải Lên Ảnh Học Bạ</label>
-                            <input type="file" class="form-control-file" id="transcripts" name="transcripts[]" accept=".jpg, .jpeg, .png" multiple required>
+                            <label style="font-weight: bold;">Ảnh Học Bạ đã tải lên:</label>
+                            <div>
+                                <?php if (is_array($img_hoc_ba) && !empty($img_hoc_ba)) : ?>
+                                    <?php foreach ($img_hoc_ba as $img) : ?>
+                                        <a href="<?= htmlspecialchars($img) ?>" target="_blank">
+                                            <img src="<?= htmlspecialchars($img) ?>" alt="Ảnh học bạ" style="max-width: 50%; height: auto;" class="thumbnail mb-2">
+                                        </a>
+                                    <?php endforeach; ?>
+                                <?php else : ?>
+                                    <p>Không có ảnh học bạ nào được tải lên.</p>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="transcripts">Tải Lên Ảnh Học Bạ Mới</label>
+                            <input type="file" class="form-control-file" id="transcripts" name="transcripts[]" accept=".jpg, .jpeg, .png" multiple>
                         </div>
                         <div class="preview-container" id="transcripts-preview"></div>
 
                         <div class="container my-5">
                             <h2>Chọn Khối Thi và Nhập Điểm</h2>
-
+                            <?php
+                            // decode vì trong database để jsson
+                            $score = json_decode($application['score'], true);
+                            $block = $score["block"];
+                            ?>
                             <div id="examForm">
                                 <div class="form-group">
                                     <label for="blockSelect">Chọn Khối Thi</label>
                                     <select class="form-control" id="blockSelect" name="blockSelect">
                                         <option value="">-- Chọn Khối Thi --</option>
                                         <?php foreach ($subjects as $code => $subjectList): ?>
-                                            <option value="<?= htmlspecialchars($code) ?>">
+                                            <option value="<?= htmlspecialchars($code) ?>" <?= $code === $block ? 'selected' : '' ?>>
                                                 <?= htmlspecialchars($code) ?> - <?= implode(', ', $subjectList) ?>
                                             </option>
                                         <?php endforeach; ?>
@@ -357,14 +413,13 @@
                                 <div id="subjectsContainer" class="subject-input">
                                     <!-- Các môn sẽ được thêm vào đây -->
                                 </div>
-
                             </div>
                         </div>
                         <div class="form-group">
                             <label for="comments">Ghi Chú (Nếu Có)</label>
                             <textarea class="form-control" id="comments" name="comments" rows="4" placeholder="Nhập ghi chú nếu có"><?= isset($_SESSION['data_errors']['review_comments']) ? htmlspecialchars($_SESSION['data_errors']['review_comments']) : '' ?></textarea>
                         </div>
-                        <button type="submit" class="btn btn-primary">Nộp Hồ Sơ</button>
+                        <button type="submit" class="btn btn-primary">Cập Nhật Hồ Sơ</button>
                     </form>
                 </div>
             </div>
@@ -407,6 +462,7 @@
                     reader.onload = function(e) {
                         const img = document.createElement('img');
                         img.src = e.target.result;
+                        //img.style = "width:200px"
                         img.classList.add('preview-image');
                         previewContainer.appendChild(img);
                     };
@@ -423,34 +479,90 @@
             handleFileSelect(event, 'transcripts-preview');
         });
     </script>
-
+    <?PHP
+    print_r($subjects);
+    print_r($score);
+    ?>
 
     <script>
-        // Chuyển dữ liệu từ PHP sang JavaScript
+        // Chuyển dữ liệu từ PHP sang JavaScript dạng JSON
         const subjects = <?php echo json_encode($subjects); ?>;
+        const diem_va_khoi_xet_tuyen = <?php echo json_encode($score); ?>;
 
-        document.getElementById('blockSelect').addEventListener('change', function() {
-            const selectedBlock = this.value;
+        // Kết hợp subjects và diem_va_khoi_xet_tuyen để tạo ra mảng mới binding dữ liệu của 2 mảng lại
+        const combinedData = Object.keys(subjects).reduce((acc, block) => {
+            acc[block] = subjects[block].reduce((subAcc, subject) => {
+                subAcc[subject] = diem_va_khoi_xet_tuyen.subjects[subject] || '';
+                return subAcc;
+            }, {});
+            return acc;
+        }, {});
+
+        console.log(combinedData);
+
+        /*
+        Giải thích Chi Tiết:
+const selectedBlock = blockSelect.value;
+
+Lấy giá trị của khối thi hiện tại từ dropdown (blockSelect). Đây là mã khối thi mà người dùng chọn.
+console.log(selectedBlock);
+
+In giá trị của khối thi được chọn ra bảng điều khiển (console) để kiểm tra và gỡ lỗi.
+subjectsContainer.innerHTML = '';
+
+Xóa nội dung hiện tại của subjectsContainer. Điều này đảm bảo rằng các môn học cũ sẽ bị xóa trước khi thêm các môn học mới cho khối thi hiện tại.
+if (selectedBlock && combinedData[selectedBlock]) {
+
+Kiểm tra xem có một khối thi được chọn và liệu khối thi đó có tồn tại trong combinedData. Nếu có, tiếp tục xử lý các môn học.
+Object.keys(combinedData[selectedBlock]).forEach(subject => {
+
+Lấy danh sách các môn học cho khối thi được chọn từ combinedData và lặp qua từng môn học.
+const div = document.createElement('div');
+
+Tạo một phần tử div để chứa thông tin cho mỗi môn học.
+div.classList.add('form-group');
+
+Thêm lớp CSS form-group cho div để áp dụng kiểu dáng phù hợp (thường dùng trong Bootstrap).
+div.innerHTML = ...
+
+Cập nhật nội dung HTML của div để bao gồm một thẻ label và một thẻ input:
+<label for="${subject}">${subject}</label>: Tạo một thẻ label với tên môn học.
+<input type="number" class="form-control" id="${subject}" name="subjects[${subject}]" placeholder="Nhập điểm ${subject}" value="${combinedData[selectedBlock][subject] || ''}">: Tạo một ô nhập điểm cho môn học đó với giá trị được lấy từ combinedData. Nếu không có điểm, ô nhập sẽ để trống.
+subjectsContainer.appendChild(div);
+
+Thêm div vào subjectsContainer, hiển thị các môn học và ô nhập điểm trên giao diện người dùng.
+        */
+        document.addEventListener('DOMContentLoaded', function() {
+            const blockSelect = document.getElementById('blockSelect');
             const subjectsContainer = document.getElementById('subjectsContainer');
 
-            // Clear previous subjects
-            subjectsContainer.innerHTML = '';
+            function updateSubjects() {
+                const selectedBlock = blockSelect.value;
+                console.log(selectedBlock);
+                // Clear dữ liệu trong khối div
+                subjectsContainer.innerHTML = '';
 
-            if (selectedBlock && subjects[selectedBlock]) {
-                subjects[selectedBlock].forEach(subject => {
-                    const div = document.createElement('div');
-                    div.classList.add('form-group');
+                if (selectedBlock && combinedData[selectedBlock]) {
+                    Object.keys(combinedData[selectedBlock]).forEach(subject => {
+                        const div = document.createElement('div');
+                        div.classList.add('form-group');
 
-                    div.innerHTML = `
-                    <label for="${subject}">${subject}</label>
-                    <input type="number" class="form-control" id="${subject}" name="subjects[${subject}]" placeholder="Nhập điểm ${subject}">
-                `;
+                        div.innerHTML = `
+                        <label for="${subject}">${subject}</label>
+                        <input type="number" class="form-control" id="${subject}" name="subjects[${subject}]" placeholder="Nhập điểm ${subject}" value="${combinedData[selectedBlock][subject] || ''}">
+                    `;
 
-                    subjectsContainer.appendChild(div);
-                });
+                        subjectsContainer.appendChild(div);
+                    });
+                }
             }
+
+            // Cập nhật môn học khi trang tải xong và khi khối thi thay đổi
+            blockSelect.addEventListener('change', updateSubjects);
+            updateSubjects(); // Gọi hàm để hiển thị môn học khi trang tải xong
         });
     </script>
+
 </body>
 
 </html>
