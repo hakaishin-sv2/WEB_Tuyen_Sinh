@@ -68,6 +68,7 @@
                   <thead>
                     <tr>
                       <th>ID</th>
+                      <th>Ảnh bìa</th>
                       <th>industry code</th>
                       <th>Tên ngành</th>
                       <th>Khối xét tuyển</th>
@@ -78,6 +79,7 @@
                   <tfoot>
                     <tr>
                       <th>ID</th>
+                      <th>Ảnh bìa</th>
                       <th>industry code</th>
                       <th>Tên ngành</th>
                       <th>Khối xét tuyển</th>
@@ -90,6 +92,14 @@
                     foreach ($list as $item) : ?>
                       <tr>
                         <td><?= htmlspecialchars($item["major_id"]) ?></td>
+                        <td>
+                          <?php if (!empty($item["img_major"])): ?>
+
+                            <img src="<?= "../" . htmlspecialchars($item["img_major"]) ?>" alt="img_major" class="rounded-circle" style="width: 100px; height: 100px;">
+                          <?php else: ?>
+                            <span>No image</span>
+                          <?php endif; ?>
+                        </td>
                         <td><?= htmlspecialchars($item["industry_code"]) ?></td>
                         <td><?= htmlspecialchars($item["major_name"]) ?></td>
                         <td>

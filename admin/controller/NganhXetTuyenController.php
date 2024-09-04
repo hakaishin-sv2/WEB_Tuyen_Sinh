@@ -17,7 +17,7 @@ function Create_nganh_xettuyen($conn)
 {
     // Bắt đầu transaction
     mysqli_begin_transaction($conn);
-    $exam_blocks =  getListTable($conn, "exam_blocks");
+    $exam_blocks = getListTable($conn, "exam_blocks");
     try {
         if ($_SERVER["REQUEST_METHOD"] == "POST" && !empty($_POST)) {
             $industry_code = mysqli_real_escape_string($conn, $_POST["industry_code"]);
@@ -30,9 +30,19 @@ function Create_nganh_xettuyen($conn)
                 'ten_nganh' => $name,
                 'description' => $description,
             ];
+
+            // Xử lý upload ảnh
+            $uploadResult = uploadFile('image', 'majors');
+            if (isset($uploadResult['error'])) {
+                $errors[] = $uploadResult['error'];
+            } elseif (isset($uploadResult)) {
+                $data['img_major'] = "uploads/majors/" . $uploadResult;
+            }
+
+            // Validate dữ liệu
             $errors = validate_Create_Nganhxettuyen($data);
             if (empty($exam_blocks)) {
-                $errors[] = "Vui lòng chọn tích chọn các tổ hợp sẽ xét tuyển cho ngành này";
+                $errors[] = "Vui lòng chọn các tổ hợp sẽ xét tuyển cho ngành này";
             }
 
             // Nếu có lỗi, lưu vào session và redirect lại form
@@ -42,6 +52,7 @@ function Create_nganh_xettuyen($conn)
                 header('Location: index.php?act=nganh-xet-tuyen-create');
                 exit();
             }
+
             // Insert dữ liệu vào bảng majors và lấy id vừa insert
             $major_id = insert($conn, "majors", $data);
 
@@ -97,8 +108,27 @@ function UpdateMajor($conn, $id)
                 'industry_code' => $industry_code,
                 'ten_nganh' => $name,
                 'description' => $description,
-
             ];
+
+            // Xử lý ảnh mới nếu có
+            if (isset($_FILES['image']) && $_FILES['image']['error'] == UPLOAD_ERR_OK) {
+                $imgPath   = uploadFile('image', 'majors');
+                // Kiểm tra và xử lý upload file
+                if ($imgPath != null || !empty($imgPath)) {
+                    // Xóa ảnh cũ nếu có
+                    if (!empty($form_data['img_major'])) {
+                        deleteFile("../" . $form_data['img_major']);
+                    }
+                    // Cập nhật đường dẫn ảnh vào dữ liệu
+                    $data['img_major'] = "uploads/majors/" . $imgPath;
+                } else {
+                    // Nếu upload không thành công
+                    $_SESSION['errors'][] = 'Không thể tải lên ảnh. Vui lòng thử lại.';
+                }
+            } elseif (!empty($form_data['img_major'])) {
+                // Giữ ảnh cũ nếu không có ảnh mới
+                $data['img_major'] = $form_data['img_major'];
+            }
 
             // Cập nhật thông tin ngành
             update($conn, "majors", $data, $id);
@@ -106,13 +136,13 @@ function UpdateMajor($conn, $id)
             // Xử lý các tổ hợp môn
             if (!empty($_POST['exam_blocks'])) {
                 $exam_blocks = $_POST['exam_blocks'];
-                print_r($exam_blocks);
                 // Xóa các tổ hợp môn cũ của ngành
                 $delete_blocks_query = "DELETE FROM exam_block_major WHERE major_id = ?";
                 $stmt = $conn->prepare($delete_blocks_query);
                 $stmt->bind_param("i", $id);
                 $stmt->execute();
                 $stmt->close();
+
                 foreach ($exam_blocks as $block_id) {
                     $block_data = [
                         'major_id' => $id,

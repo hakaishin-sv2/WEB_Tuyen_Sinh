@@ -48,7 +48,7 @@
         <!-- Begin Page Content -->
         <div class="container-fluid">
           <!-- Page Heading -->
-          <h1 class="h3 mb-2 text-gray-800">Quản lý user</h1>
+          <h1 class="h3 mb-2 text-gray-800">Quản lý khối xét tuyển</h1>
           <!-- <p class="mb-4">
               DataTables is a third party plugin that is used to generate the
               demo table below. For more information about DataTables, please

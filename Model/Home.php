@@ -1,20 +1,4 @@
 <?php
-function get_all_categories($conn)
-{
-    $query = "SELECT id, name_category FROM categories";
-
-    $result = $conn->query($query);
-    if (!$result) {
-        die("Error executing query: " . $conn->error);
-    }
-
-    $categories = [];
-    while ($row = $result->fetch_assoc()) {
-        $categories[] = $row;
-    }
-
-    return $categories;
-}
 // // Hàm cập nhật view_count và đánh dấu post_id đã được xem
 function manage_post_view($conn, $post_id)
 {
@@ -33,923 +17,281 @@ function manage_post_view($conn, $post_id)
 }
 
 
-// Banner
-function get_top_6_posts_recent_and_most_viewed($conn)
+function checkProgramExists($conn, $currentYear)
 {
-    // Lấy ngày hiện tại và ngày 7 ngày trước
-    $currentDate = date('Y-m-d');
-    $sevenDaysAgo = date('Y-m-d', strtotime('-7 days'));
+    $currentYear = date("Y");
+    $sql = "SELECT * FROM programs WHERE year = ?";
+    $stmt = mysqli_prepare($conn, $sql);
 
-    // Câu lệnh SQL để lấy 6 bài viết mới nhất và có nhiều lượt xem nhất trong 7 ngày gần nhất
-    $query = "
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, 'i', $currentYear);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        if (mysqli_num_rows($result) > 0) {
+            // Nếu tìm thấy bản ghi với năm hiện tại, trả về true
+            return true;
+        }
+    }
+
+    // Trả về false nếu không tìm thấy hoặc có lỗi
+    return false;
+}
+
+
+// phân trang
+function getlistNganhTuyensinh($conn, $search = '', $limit, $offset)
+{
+    // Khởi tạo mảng chứa kết quả
+    $result = [];
+    $currentyear = date("Y");
+
+    // Kiểm tra xem năm hiện tại có chương trình tuyển sinh hay không
+    $checkTonTai = checkProgramExists($conn, $conn);
+
+    if (!$checkTonTai) {
+        $currentyear = $currentyear - 1;
+    }
+
+    // Chuẩn bị câu truy vấn SQL để lấy thông tin ngành, khối xét tuyển và chương trình với điều kiện năm hiện tại
+    $sql = "
         SELECT 
-            p.id,
-            p.title,
-            p.excerpt,
-            p.content,
-            p.img_thumbnail,
-            p.created_at,
-            p.views_count
+            m.id, 
+            m.ten_nganh, 
+            m.description, 
+            m.img_major,
+            pm.cut_off_score,
+            p.year,
+            GROUP_CONCAT(CONCAT(e.code, ' - ', e.name) SEPARATOR ' + ') AS exam_blocks,
+            GROUP_CONCAT(DISTINCT p.name SEPARATOR ', ') AS programs
+        FROM majors m
+        JOIN exam_block_major meb ON m.id = meb.major_id
+        JOIN exam_blocks e ON meb.exam_block_id = e.id
+        JOIN program_majors pm ON m.id = pm.major_id
+        JOIN programs p ON pm.program_id = p.id
+        WHERE m.ten_nganh LIKE ? AND p.year = ?
+        GROUP BY m.id, m.ten_nganh, m.description
+        ORDER BY m.id ASC
+        LIMIT ? OFFSET ?
+    ";
+
+    // Sử dụng câu lệnh chuẩn bị để tránh SQL Injection
+    $stmt = $conn->prepare($sql);
+
+    // Thay thế dấu hỏi (?) bằng giá trị của biến $search, năm hiện tại, limit và offset
+    $searchParam = '%' . $search . '%';
+    $stmt->bind_param('ssii', $searchParam, $currentyear, $limit, $offset);
+
+    // Thực thi câu lệnh
+    if ($stmt->execute()) {
+        // Lấy kết quả từ câu truy vấn
+        $resultSet = $stmt->get_result();
+
+        // Duyệt qua từng hàng trong kết quả
+        while ($row = $resultSet->fetch_assoc()) {
+            $result[] = $row;
+        }
+    } else {
+        // In ra lỗi nếu câu truy vấn thất bại
+        echo "Lỗi truy vấn: " . $stmt->error;
+    }
+
+    // Đóng câu lệnh
+    $stmt->close();
+
+    // Trả về mảng kết quả
+    return $result;
+}
+
+// count page
+function CountTotal_nganhtuyensinh_by_year($conn)
+{
+    $currentyear = date("Y");
+
+    // Kiểm tra xem năm hiện tại có chương trình tuyển sinh hay không
+    $checkTonTai = checkProgramExists($conn, $conn);
+
+    if (!$checkTonTai) {
+        $currentyear = $currentyear - 1;
+    }
+
+    // Chuẩn bị câu truy vấn SQL để đếm tổng số ngành thỏa mãn điều kiện năm hiện tại
+    $sql = "
+      SELECT COUNT(*) AS total from programs p JOIN program_majors pm on p.id =pm.program_id WHERE p.year=? 
+       
+    ";
+
+    // Sử dụng câu lệnh chuẩn bị để tránh SQL Injection
+    $stmt = $conn->prepare($sql);
+
+    // Thay thế dấu hỏi (?) bằng giá trị của biến $search và năm hiện tại
+
+    $stmt->bind_param('i', $currentyear);
+
+    // Thực thi câu lệnh
+    if ($stmt->execute()) {
+        // Lấy kết quả từ câu truy vấn
+        $resultSet = $stmt->get_result();
+        $row = $resultSet->fetch_assoc();
+        $total = $row['total'];
+    } else {
+        // In ra lỗi nếu câu truy vấn thất bại
+        echo "Lỗi truy vấn: " . $stmt->error;
+        $total = 0;
+    }
+
+    // Đóng câu lệnh
+    $stmt->close();
+
+    // Trả về số lượng tổng cộng các ngành
+    return $total;
+}
+
+// bài chi tiết tuyển sinh từng ngành
+function get_item_nganh($conn, $id)
+{
+    // Khởi tạo mảng chứa kết quả
+    $result = [];
+    $currentyear = date("Y");
+
+    // Kiểm tra xem năm hiện tại có chương trình tuyển sinh hay không
+    $checkTonTai = checkProgramExists($conn, $conn);
+
+    if (!$checkTonTai) {
+        $currentyear = $currentyear - 1;
+    }
+
+    // Chuẩn bị câu truy vấn SQL để lấy thông tin ngành, khối xét tuyển và chương trình với điều kiện năm hiện tại
+    $sql = "
+        SELECT 
+            pm.major_id,
+            m.ten_nganh, 
+            m.description, 
+            m.img_major,
+            pm.cut_off_score,
+            p.*,
+            GROUP_CONCAT(CONCAT(e.code, ' - ', e.name) SEPARATOR ' + ') AS exam_blocks,
+            GROUP_CONCAT(DISTINCT p.name SEPARATOR ', ') AS programs
+        FROM majors m
+        JOIN exam_block_major meb ON m.id = meb.major_id
+        JOIN exam_blocks e ON meb.exam_block_id = e.id
+        JOIN program_majors pm ON m.id = pm.major_id
+        JOIN programs p ON pm.program_id = p.id
+        WHERE m.id=? and p.year = ?
+        GROUP BY m.id, m.ten_nganh, m.description
+    ";
+
+    // Sử dụng câu lệnh chuẩn bị để tránh SQL Injection
+    $stmt = $conn->prepare($sql);
+
+    // Thay thế dấu hỏi (?) bằng giá trị của biến $search, năm hiện tại, limit và offset
+    $stmt->bind_param('ii', $id, $currentyear);
+
+    // Thực thi câu lệnh
+    if ($stmt->execute()) {
+        // Lấy kết quả từ câu truy vấn
+        $resultSet = $stmt->get_result();
+
+        // Duyệt qua từng hàng trong kết quả
+        while ($row = $resultSet->fetch_assoc()) {
+            $result[] = $row;
+        }
+    } else {
+        // In ra lỗi nếu câu truy vấn thất bại
+        echo "Lỗi truy vấn: " . $stmt->error;
+    }
+
+    // Đóng câu lệnh
+    $stmt->close();
+
+    // Trả về mảng kết quả
+    return $result;
+}
+function get_diem_trung_tuyen_3_nam_gan_nhat($conn, $id)
+{
+    // Lấy năm hiện tại và trừ đi 1
+    $currentYear = date("Y") - 1;
+
+    // Chuẩn bị câu truy vấn SQL
+    $sql = "
+        SELECT 
+            pm.cut_off_score, 
+            p.year
         FROM 
-            posts p
+            program_majors pm
+        JOIN 
+            programs p ON pm.program_id = p.id
         WHERE 
-            p.created_at BETWEEN ? AND ?
+            pm.major_id = ? 
+            AND p.year BETWEEN ? AND ?
         ORDER BY 
-            p.views_count DESC, p.created_at DESC
-        LIMIT 6
-    ";
-
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-
-    $stmt->bind_param('ss', $sevenDaysAgo, $currentDate);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-    $posts = $result->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
-
-    return $posts;
-}
-
-// Các bài viết tiêu điểm
-function get_post_view_biggest($conn)
-{
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            a.avatar,
-            p.status,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name,
-            p.views_count
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE p.status =1
-
-        ORDER BY
-            p.views_count DESC
-        LIMIT 1
-    ";
-
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $post = $result->fetch_assoc();
-
-    $stmt->close();
-
-    return $post;
-}
-
-function get_top6_new_post($conn)
-{
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        WHERE 
-            p.status = 1
-        ORDER BY
-            p.created_at DESC
-        LIMIT 6
-    ";
-
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $posts = [];
-    while ($post = $result->fetch_assoc()) {
-        $posts[] = $post;
-    }
-
-    $stmt->close();
-
-    return $posts;
-}
-
-function get_top5_trending_posts($conn)
-{
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE
-            p.is_trending = 1 AND p.status =1
-        ORDER BY
-            p.created_at DESC
-        LIMIT 5
-    ";
-
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $posts = [];
-    while ($post = $result->fetch_assoc()) {
-        $posts[] = $post;
-    }
-
-    $stmt->close();
-
-    return $posts;
-}
-
-// Lấy theo Danh Mục bóng đá thế giới 
-
-// Bài có view cao nhất của bóng đá thế  giới
-function bai_viet_view_count_nhat_theWorld($conn)
-{
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name,
-            p.views_count
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE
-           p.area = 1 AND  p.status =1
-        ORDER BY
-            p.views_count DESC
-        LIMIT 1
-    ";
-
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $post = $result->fetch_assoc();
-
-    $stmt->close();
-
-    return $post;
-}
-
-// 6 bài trending và mới nhất
-function get_top6_posts_by_category_and_area_theWorld($conn)
-{
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE
-           p.area = 1 AND p.is_trending = 1 AND p.status =1
-        ORDER BY
-            p.created_at DESC
-        LIMIT 6
-    ";
-
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $posts = [];
-    while ($post = $result->fetch_assoc()) {
-        $posts[] = $post;
-    }
-
-    $stmt->close();
-
-    return $posts;
-}
-
-// 3 bài viết mới nhất của bóng đá ngoài nước
-function get_top3_latest_posts_by_category_theWord($conn)
-{
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE
-           p.area = 1 AND p.status =1
-        ORDER BY
-            p.created_at DESC
+            p.year DESC
         LIMIT 3
     ";
 
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
+    // Sử dụng câu lệnh chuẩn bị để tránh SQL Injection
+    $stmt = $conn->prepare($sql);
+
+    // Gán giá trị cho các biến dấu hỏi trong câu truy vấn
+    $threeYearsAgo = $currentYear - 2;
+    $stmt->bind_param('iii', $id, $threeYearsAgo, $currentYear);
+
+    // Thực thi câu lệnh
+    if ($stmt->execute()) {
+        // Lấy kết quả từ câu truy vấn
+        $result = $stmt->get_result();
+
+        // Khởi tạo mảng chứa kết quả
+        $scores = [];
+        while ($row = $result->fetch_assoc()) {
+            $scores[] = $row;
+        }
+
+        return $scores;
+    } else {
+        // In ra lỗi nếu câu truy vấn thất bại
+        echo "Lỗi truy vấn: " . $stmt->error;
     }
 
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $posts = [];
-    while ($post = $result->fetch_assoc()) {
-        $posts[] = $post;
-    }
-
+    // Đóng câu lệnh
     $stmt->close();
 
-    return $posts;
+    return [];
 }
-
-// Danh mục Bóng Đá Việt Nam
-
-// Bài viết có view_count cao nhất trong nước
-function bai_viet_view_count_nhat_inVietNam($conn)
+function check_nop_han_nop_ho_so($conn, $major_id)
 {
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name,
-            p.views_count
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE
-           p.area = 0 AND p.status =1
-        ORDER BY
-            p.views_count DESC
-        LIMIT 1
+    $currentYear = date("Y");
+    $sql = "
+        SELECT pm.id
+        FROM program_majors pm
+        JOIN programs p ON pm.program_id = p.id
+        WHERE pm.major_id = ?
+          AND pm.status = 'active'
+          AND p.year = ?
     ";
+    $stmt = $conn->prepare($sql);
 
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-
+    $stmt->bind_param("ii", $major_id, $currentYear);
     $stmt->execute();
+
     $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
+    if ($result->num_rows > 0) {
+        // Có bản ghi thỏa mãn điều kiện, trả về true
+        return true;
+    } else {
+        // Không có bản ghi thỏa mãn điều kiện, trả về false
+        return false;
     }
-
-    $post = $result->fetch_assoc();
-
-    $stmt->close();
-
-    return $post;
 }
-
-// 6 bài trending và mới nhất trong nước
-function get_top6_posts_by_category_and_area_inVietNam($conn)
+// check đã nộp hồ sơ cho ngành này trong anmw tuyển sinh này chưa
+function hasSubmittedApplication($user_id, $program_id, $major_id, $conn)
 {
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE
-           p.area = 0 AND p.is_trending = 1 AND p.status =1
-        ORDER BY
-            p.created_at DESC
-        LIMIT 6
-    ";
-
+    $query = "SELECT COUNT(*) as count FROM applications WHERE user_id = ? AND program_id = ? AND major_id = ?";
     $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
+    $stmt->bind_param("iii", $user_id, $program_id, $major_id);
     $stmt->execute();
     $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $posts = [];
-    while ($post = $result->fetch_assoc()) {
-        $posts[] = $post;
-    }
-
+    $row = $result->fetch_assoc();
     $stmt->close();
-
-    return $posts;
-}
-
-// 3 bài viết mới nhất trong nước
-function get_top3_latest_posts_by_category_inVietNam($conn)
-{
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE
-           p.area = 0 AND p.status =1
-        ORDER BY
-            p.created_at DESC
-        LIMIT 3
-    ";
-
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $posts = [];
-    while ($post = $result->fetch_assoc()) {
-        $posts[] = $post;
-    }
-
-    $stmt->close();
-
-    return $posts;
-}
-
-// Danh mục TQuaanf vợt Tennis
-
-function get_top6_trending_posts_by_category($conn, $category_id)
-{
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE
-            p.status = 1 AND p.is_trending = 1 AND p.category_id = ?
-        ORDER BY
-            p.created_at DESC
-        LIMIT 6
-    ";
-
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-
-    $stmt->bind_param("i", $category_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $posts = [];
-    while ($post = $result->fetch_assoc()) {
-        $posts[] = $post;
-    }
-
-    $stmt->close();
-
-    return $posts;
-}
-function get_top6_latest_posts_by_category($conn, $category_id)
-{
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE
-            p.status = 1 AND p.category_id = ?
-        ORDER BY
-            p.created_at DESC
-        LIMIT 6
-    ";
-
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-
-    $stmt->bind_param("i", $category_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $posts = [];
-    while ($post = $result->fetch_assoc()) {
-        $posts[] = $post;
-    }
-
-    $stmt->close();
-
-    return $posts;
-}
-
-function get_top6_posts_by_view_count_and_category($conn, $category_id)
-{
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name,
-            p.views_count
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE
-            p.status = 1 AND p.category_id = ?
-        ORDER BY
-            p.views_count DESC
-        LIMIT 3
-    ";
-
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-
-    $stmt->bind_param("i", $category_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $posts = [];
-    while ($post = $result->fetch_assoc()) {
-        $posts[] = $post;
-    }
-
-    $stmt->close();
-
-    return $posts;
-}
-
-
-// Các bọ môn thể thao khác
-function get_top3_trending_posts_sport_orther($conn)
-{
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE
-            p.status = 1 AND p.is_trending = 1 AND p.area <> 0 AND p.area <> 1
-        ORDER BY
-            p.created_at DESC
-        LIMIT 3
-    ";
-
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $posts = [];
-    while ($post = $result->fetch_assoc()) {
-        $posts[] = $post;
-    }
-
-    $stmt->close();
-
-    return $posts;
-}
-
-// 6 bài viets mới tạo nhất
-function get_top6_latest_posts_sport_orther($conn)
-{
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE
-            p.status = 1 AND p.area <> 0 AND p.area <> 1 AND p.is_trending=0
-        ORDER BY
-            p.created_at DESC
-        LIMIT 6
-    ";
-
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $posts = [];
-    while ($post = $result->fetch_assoc()) {
-        $posts[] = $post;
-    }
-
-    $stmt->close();
-
-    return $posts;
-}
-function get_top3_posts_by_view_count_orther_sport($conn)
-{
-    $query = "
-        SELECT 
-            p.id,
-            p.title,
-            p.area,
-            p.excerpt,
-            p.content,
-            c.name_category AS category_name,
-            u.full_name AS author_name,
-            u.email AS author_email,
-            p.img_thumbnail,
-            p.img_cover,
-            p.status,
-            a.avatar,
-            p.is_trending,
-            p.created_at,
-            p.updated_at,
-            pd.full_name AS pheduyet_name,
-            p.views_count
-        FROM 
-            posts p
-        JOIN 
-            authors a ON p.author_id = a.user_id
-        JOIN 
-            users u ON a.user_id = u.id
-        JOIN 
-            categories c ON p.category_id = c.id
-        LEFT JOIN 
-            users pd ON p.pheduyet_by = pd.id
-        WHERE
-            p.status = 1 AND p.area <> 0 AND p.area <> 1
-        ORDER BY
-            p.views_count DESC
-        LIMIT 3
-    ";
-
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        die("Error preparing statement: " . $conn->error);
-    }
-
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if (!$result) {
-        die("Error executing statement: " . $stmt->error);
-    }
-
-    $posts = [];
-    while ($post = $result->fetch_assoc()) {
-        $posts[] = $post;
-    }
-
-    $stmt->close();
-
-    return $posts;
+    return $row['count'] > 0;
 }

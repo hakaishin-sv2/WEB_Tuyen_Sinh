@@ -39,7 +39,8 @@ function mo_cong_tuyen_sinh_one_create($conn)
             exit();
         }
         // Dữ liệu để chèn vào bảng programs
-        $currentYear = date('Y');
+        // $currentYear = date('Y');
+        $currentYear = 2022;
         $data = [
             'name' => $name,
             'start_date' => $start_date,
@@ -92,7 +93,7 @@ function mo_cong_tuyen_sinh_one_create($conn)
         }
 
         $_SESSION['success'] = "Mở cổng tuyển sinh thành công";
-        header('Location: index.php?act=mo-cong-tuyen-sinh-list');
+        header('Location: index.php?act=list-open-majors');
         exit();
     }
 
@@ -309,7 +310,7 @@ function NhapDiemTrungTuyen($conn, $id_pm)
             // Kiểm tra giá trị điểm nhập vào
             foreach ($postedScores as $field => $diem) {
                 if (!is_numeric($diem) || $diem < 15 || $diem > 30) {
-                    $_SESSION['errors'][] = "Điểm nhập vào phải nằm trong khoảng từ 15 đến 30.";
+                    $_SESSION['errors'][] = "Điểm nhập vào phải nằm trong khoảng từ 15 đến 30. Và cần nhập hét điểm trúng tuyển";
                     $isValid = false;
                     break;
                 }

@@ -76,6 +76,8 @@
 
               <div class="container mt-5">
                 <h2>Update bài viết mới</h2>
+                <?php //print_r($form_data) 
+                ?>
                 <form action="" method="POST" enctype="multipart/form-data">
                   <div class="row">
                     <!-- Cột trái -->
@@ -97,7 +99,20 @@
                         <label for="description">Mô tả ngành:</label>
                         <textarea class="form-control" id="description" name="description" rows="3" placeholder="Mô tả ngắn về ngành"><?= htmlspecialchars($form_data['description']); ?></textarea>
                       </div>
-
+                      <!-- Hiển thị ảnh cũ nếu có -->
+                      <?php if (!empty($form_data['img_major'])): ?>
+                        <div class="form-group">
+                          <label>Ảnh bìa hiện tại:</label>
+                          <div>
+                            <img src="<?= "../" . htmlspecialchars($form_data['img_major']); ?>" alt="Ảnh bìa hiện tại" style="max-width: 50%; height: auto;">
+                          </div>
+                        </div>
+                      <?php endif; ?>
+                      <div class="form-group">
+                        <label for="image">Tải ảnh bìa của ngành:</label>
+                        <input type="file" class="form-control-file" id="image" name="image" accept="image/*">
+                        <img id="previewImage" src="#" alt="Ảnh xem trước" style="display: none; margin-top: 10px; max-width: 50%; height: auto;">
+                      </div>
                       <!-- Chọn mã tổ hợp -->
                       <div class="form-group">
                         <label for="exam_blocks">Chọn tổ hợp môn:</label>
@@ -230,7 +245,27 @@
 
   <!-- Page level custom scripts -->
   <script src="view/js/demo/datatables-demo.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var fileInput = document.getElementById('image');
+      var previewImage = document.getElementById('previewImage');
 
+      fileInput.addEventListener('change', function() {
+        var file = fileInput.files[0];
+        if (file) {
+          var reader = new FileReader();
+          reader.onload = function(e) {
+            previewImage.src = e.target.result;
+            previewImage.style.display = 'block';
+          };
+          reader.readAsDataURL(file);
+        } else {
+          previewImage.src = '#';
+          previewImage.style.display = 'none';
+        }
+      });
+    });
+  </script>
 
 </body>
 

@@ -106,8 +106,6 @@
                     <td colspan="2">Không có dữ liệu để hiển thị.</td>
                   </tr>
                 <?php endif; ?>
-
-
               </table>
               <a href="index.php?act=nganh-xet-tuyen-list" class="btn btn-danger">Quay lại</a>
               <a href="index.php?act=nganh-xet-tuyen-update&id=<?= isset($_GET['id']) ? $_GET['id'] : '' ?>" class="btn btn-warning">Update</a>

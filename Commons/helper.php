@@ -139,19 +139,49 @@ function uploadFile($name_input_file, $directory)
         $file = $_FILES[$name_input_file];
         $uploadDir = "../uploads/$directory/";
 
+        // Tạo thư mục nếu chưa tồn tại
         if (!file_exists($uploadDir) && !is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
+
+        // Kiểm tra định dạng file
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if (!in_array($file['type'], $allowedTypes)) {
+            return ['error' => 'Chỉ cho phép tải lên file ảnh (JPEG, PNG, GIF)'];
+        }
+
         // Tạo tên file mới để tránh trùng lặp
         $fileName = uniqid() . '_' . basename($file['name']);
-        // Đường dẫn mới của file
         $uploadPath = $uploadDir . $fileName;
+
+        // Di chuyển file đến thư mục đã chỉ định
         if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
-            return $uploadPath;
+            return $fileName; // Trả về tên file
+        } else {
+            return ['error' => 'Không thể tải lên file'];
         }
     }
-
     return null;
+}
+
+
+// Hàm validate file
+function validate_file($file)
+{
+    $maxFileSize = 100 * 1024 * 1024; // 100MB in bytes
+    $allowedMimeTypes = ['image/jpeg'];
+    $fileMimeType = mime_content_type($file['tmp_name']);
+
+    if ($file['error'] !== UPLOAD_ERR_OK) {
+        return ['status' => false, 'message' => 'Có lỗi xảy ra khi tải lên tệp tin.'];
+    }
+    if (!in_array($fileMimeType, $allowedMimeTypes)) {
+        return ['status' => false, 'message' => 'Tệp tin phải là ảnh JPG.'];
+    }
+    if ($file['size'] > $maxFileSize) {
+        return ['status' => false, 'message' => 'Kích thước tệp tin không được vượt quá 100MB.'];
+    }
+    return ['status' => true, 'message' => 'Tệp tin hợp lệ.'];
 }
 function uploadFile_client($name_input_file, $directory)
 {

@@ -20,6 +20,7 @@ function getKhoiNganhDto($conn)
     $sql = "
         SELECT 
             m.id AS major_id,
+            m.img_major,
             m.industry_code,
             m.ten_nganh AS major_name,  -- Đổi tên cột thành ten_nganh
             GROUP_CONCAT(CONCAT(eb.code, ' - ', eb.name) SEPARATOR '+') AS exam_blocks,
@@ -89,6 +90,7 @@ function get_form_data($conn, $id)
         SELECT 
             m.id AS major_id,
             m.industry_code,
+            m.img_major,
             m.ten_nganh AS major_name,
             GROUP_CONCAT(eb.id) AS selected_blocks, 
             m.description

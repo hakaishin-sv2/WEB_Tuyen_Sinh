@@ -185,3 +185,40 @@ function getCacNganhGiaoVienDuocDuyetHoSo($conn, $teacher_id)
     mysqli_stmt_close($stmt);
     return $majors;
 }
+
+// lấy danh sách các role teacher mà chưa được giao duyệt hồ sơ ngành nào
+/*
+SQL test
+SELECT *
+FROM users u
+WHERE u.role = 'teacher'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM teacher_assignment at
+    WHERE at.teacher_id = u.id
+  )
+LIMIT 0, 25;
+
+*/
+// các role teacher mà chưa được giao
+function getTeachersNotInAssignment($conn)
+{
+    $sql = "
+        SELECT *
+        FROM users u
+        WHERE u.role = 'teacher'
+          AND NOT EXISTS (
+            SELECT 1
+            FROM teacher_assignment at
+            WHERE at.teacher_id = u.id
+          )
+        LIMIT 0, 25;
+    ";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+
+    // Lấy tất cả kết quả
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    return $results;
+}

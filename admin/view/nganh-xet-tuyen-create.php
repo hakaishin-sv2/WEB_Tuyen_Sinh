@@ -74,7 +74,7 @@
               <div class="container mt-5">
                 <h2>Nhập thông tin</h2>
                 <br>
-                <form action="process_major.php" method="POST" enctype="multipart/form-data">
+                <form action="" method="POST" enctype="multipart/form-data">
                   <div class="row">
                     <!-- Cột trái -->
                     <div class="col-md-6">
@@ -95,7 +95,11 @@
                         <label for="description">Mô tả ngành:</label>
                         <textarea class="form-control" id="description" name="description" rows="3" placeholder="Mô tả ngắn về ngành"></textarea>
                       </div>
-
+                      <div class="form-group">
+                        <label for="image">Tải ảnh bìa của ngành:</label>
+                        <input type="file" class="form-control-file" id="image" name="image" accept="image/*">
+                        <img id="previewImage" src="#" alt="Ảnh xem trước" style="display: none; margin-top: 10px; max-width: 50%; height: auto;">
+                      </div>
                       <!-- Chọn mã tổ hợp -->
                       <div class="form-group">
                         <label for="exam_blocks">Chọn tổ hợp môn:</label>
@@ -230,6 +234,22 @@
   <!-- Page level custom scripts -->
   <script src="view/js/demo/datatables-demo.js"></script>
 
+  <script>
+    document.getElementById('image').addEventListener('change', function(event) {
+      var file = event.target.files[0];
+      var reader = new FileReader();
+
+      reader.onload = function(e) {
+        var preview = document.getElementById('previewImage');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+      };
+
+      if (file) {
+        reader.readAsDataURL(file);
+      }
+    });
+  </script>
 
 </body>
 

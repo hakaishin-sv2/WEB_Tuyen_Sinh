@@ -76,8 +76,8 @@
                                 <?php //print_r($list);
                                 $khoiXetTuyenArray = explode(' + ', $list[0]['khoivatohopxet']); // tách các khổi xét tuyển ra
                                 $diemTrungTuyen = json_decode($list[0]['diem_trung_tuyen'], true);
-                                print_r($diemTrungTuyen);
-                                print_r($khoiXetTuyenArray);
+                                // print_r($diemTrungTuyen);
+                                // print_r($khoiXetTuyenArray);
                                 ?>
                                 <h2>Nhập điểm trúng tuyển</h2>
 

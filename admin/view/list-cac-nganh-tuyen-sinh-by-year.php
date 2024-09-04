@@ -74,6 +74,7 @@
                       <th>Tên ngành</th>
                       <th>Khối xét tuyển</th>
                       <th>Điểm trúng tuyển</th>
+                      <th>Trạng thái</th>
                       <th>Action</th>
                     </tr>
                   </thead>
@@ -84,6 +85,7 @@
                       <th>Tên ngành</th>
                       <th>Khối xét tuyển</th>
                       <th>Điểm trúng tuyển</th>
+                      <th>Trạng thái</th>
                       <th>Action</th>
                     </tr>
                   </tfoot>
@@ -121,6 +123,13 @@
                             }
                           }
                           ?>
+                        </td>
+                        <td>
+                          <?php if ($item["status_cua_nganh"] == 'active') : ?>
+                            <span class="badge badge-success"><?= htmlspecialchars($item["status_cua_nganh"]) ?></span>
+                          <?php else : ?>
+                            <span class="badge badge-primary"><?= htmlspecialchars($item["status_cua_nganh"]) ?></span>
+                          <?php endif; ?>
                         </td>
                         <td>
                           <?php if ($item["status"] === 'inactive'): ?>
