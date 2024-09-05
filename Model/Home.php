@@ -303,23 +303,35 @@ function getlist_nop_ho_so_ca_nhan($user_id, $conn)
     $sql = "
         SELECT 
             p.year,
-            p.name as te_kytuyensinh,
+            p.name AS te_kytuyensinh,
             a.id,
             a.major_id,
-            a.created_at,
-            a.score,
-            a.teacher_review,
-            a.status,
+            a.user_id,
+            MAX(a.created_at) AS created_at,
+            MAX(a.score) AS score,
+            MAX(a.teacher_review) AS teacher_review,
+            MAX(a.status) AS status,
             m.industry_code,
-            m.ten_nganh
+            m.ten_nganh,
+            MAX(pm.cut_off_score) AS cut_off_score
         FROM 
             applications a
         JOIN 
             programs p ON a.program_id = p.id
         JOIN 
             majors m ON a.major_id = m.id
+        JOIN 
+            program_majors pm ON a.major_id = pm.major_id
         WHERE 
             a.user_id = ?
+        GROUP BY 
+            p.year,
+            p.name,
+            a.id,
+            a.major_id,
+            a.user_id,              -- Đảm bảo user_id được nhóm
+            m.industry_code,
+            m.ten_nganh
         ORDER BY 
             p.year DESC;  -- Sắp xếp theo năm giảm dần
     ";
@@ -333,6 +345,7 @@ function getlist_nop_ho_so_ca_nhan($user_id, $conn)
             $applications[] = [
                 'id' => $row['id'],
                 'major_id' => $row['major_id'],
+                'user_id' => $row['user_id'],  // Đảm bảo user_id được bao gồm
                 'year' => $row['year'],
                 'te_kytuyensinh' => $row['te_kytuyensinh'],
                 'created_at' => $row['created_at'],
@@ -341,6 +354,7 @@ function getlist_nop_ho_so_ca_nhan($user_id, $conn)
                 'industry_code' => $row['industry_code'],
                 'ten_nganh' => $row['ten_nganh'],
                 'teacher_review' => $row['teacher_review'],
+                'cut_off_score' => $row['cut_off_score']
             ];
         }
 
@@ -351,6 +365,7 @@ function getlist_nop_ho_so_ca_nhan($user_id, $conn)
     }
 }
 
+
 function getDetailApplicationById($id_hoso, $conn)
 {
     $sql = "
@@ -358,6 +373,7 @@ function getDetailApplicationById($id_hoso, $conn)
             p.year,
             p.name as te_kytuyensinh,
             a.id,
+            a.user_id,
             a.major_id,
             a.created_at,
             a.score,
@@ -410,6 +426,97 @@ function deleteApplicationById($application_id, $conn)
             return false;
         }
     } else {
+        return false;
+    }
+}
+// Thông báo
+function getUserNotifications_top5_new($conn, $user_id, $limit = 5)
+{
+
+    $sql = "SELECT id, application_id, message, is_read, created_at 
+            FROM notifications 
+            WHERE user_id = ? 
+            ORDER BY created_at DESC 
+            LIMIT ?";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('ii', $user_id, $limit);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $notifications = $result->fetch_all(MYSQLI_ASSOC);
+
+    $stmt->close();
+
+    return $notifications;
+}
+function get_all_thong_bao($conn, $user_id)
+{
+    // Truy vấn lấy thông báo chưa đọc
+    $sql_unread = "SELECT n.id, n.application_id, n.message, n.is_read, n.created_at, 
+                          m.industry_code, m.ten_nganh
+                   FROM notifications n
+                   JOIN applications a ON n.application_id = a.id
+                   JOIN majors m ON a.major_id = m.id
+                   WHERE n.user_id = ? AND n.is_read = 0 
+                   ORDER BY n.created_at DESC";
+
+    $stmt_unread = $conn->prepare($sql_unread);
+    $stmt_unread->bind_param('i', $user_id);
+    $stmt_unread->execute();
+    $result_unread = $stmt_unread->get_result();
+    $unread_notifications = $result_unread->fetch_all(MYSQLI_ASSOC);
+
+    // Số lượng thông báo chưa đọc
+    $unread_count = count($unread_notifications);
+
+    $stmt_unread->close();
+
+    // Truy vấn lấy thông báo đã đọc
+    $sql_read = "SELECT n.id, n.application_id, n.message, n.is_read, n.created_at, 
+                        m.industry_code, m.ten_nganh
+                 FROM notifications n
+                 JOIN applications a ON n.application_id = a.id
+                 JOIN majors m ON a.major_id = m.id
+                 WHERE n.user_id = ? AND n.is_read = 1 
+                 ORDER BY n.created_at DESC";
+
+    $stmt_read = $conn->prepare($sql_read);
+    $stmt_read->bind_param('i', $user_id);
+    $stmt_read->execute();
+    $result_read = $stmt_read->get_result();
+    $read_notifications = $result_read->fetch_all(MYSQLI_ASSOC);
+
+    $stmt_read->close();
+
+    // Số lượng thông báo đã đọc
+    $read_count = count($read_notifications);
+
+    // Trả về cả danh sách thông báo chưa đọc, đã đọc và số lượng
+    return [
+        'unread_notifications' => $unread_notifications,
+        'unread_count' => $unread_count,
+        'read_notifications' => $read_notifications,
+        'read_count' => $read_count
+    ];
+}
+
+
+
+// cập nhật đã đọc thông báo
+function markNotificationAsRead($conn, $id_thongbao)
+{
+
+    $sql = "UPDATE notifications SET is_read = 1 WHERE id = ?";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param('i', $id_thongbao);
+    $stmt->execute();
+    if ($stmt->affected_rows > 0) {
+        $stmt->close();
+        return true;
+    } else {
+        $stmt->close();
         return false;
     }
 }

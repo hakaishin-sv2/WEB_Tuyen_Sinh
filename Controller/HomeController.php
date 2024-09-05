@@ -1,5 +1,5 @@
 <?php
-function HomeIndex($conn, $search, $limit, $offset)
+function HomeIndex($conn, $search, $limit, $offset, $page_index)
 {
     if (isset($_GET["btn_search_nganh_tuyen_sinh"])) {
         $search = $_GET["search"];
@@ -12,6 +12,7 @@ function HomeIndex($conn, $search, $limit, $offset)
     // banner
     $result = getlistNganhTuyensinh($conn, $search, $limit, $offset);
     $totalItems  = CountTotal_nganhtuyensinh_by_year($conn);
+    $page = $page_index;
     // Tính toán tổng số trang
     $totalPages = ceil($totalItems / $limit);
     require_once PATH_VIEW_CLIENT . 'home.php';
@@ -139,16 +140,6 @@ function nop_ho_so($conn, $id_nganh_nop)
                 } else {
                     $errors[] = 'Bạn chưa tải lên tệp học bạ.';
                 }
-
-                // Nếu có lỗi, lưu vào session và quay lại trang trước đó
-                if (!empty($errors)) {
-                    $_SESSION['errors'] = $errors;
-                    $major_id = $item[0]["major_id"];
-                    header('Location: index.php?act=nop-ho-so&id=' . $major_id);
-                    exit();
-                }
-
-                // Xây dựng mảng dữ liệu
                 $data = [
                     'phone' => $phone,
                     'user_id' => $_SESSION["user"]["id"],
@@ -161,6 +152,17 @@ function nop_ho_so($conn, $id_nganh_nop)
                     'img_hoc_ba' => json_encode($transcriptsPaths),
                     //'subjects' => json_encode($subjectsData) 
                 ];
+                // Nếu có lỗi, lưu vào session và quay lại trang trước đó
+                if (!empty($errors)) {
+                    $_SESSION['errors'] = $errors;
+                    $_SESSION['data_errors'] = $data;
+                    $major_id = $item[0]["major_id"];
+                    header('Location: index.php?act=nop-ho-so&id=' . $major_id);
+                    exit();
+                }
+
+                // Xây dựng mảng dữ liệu
+
 
                 insert($conn, "applications", $data);
                 $_SESSION['success'] = "Nộp hồ sơ xét tuyển thành công";
@@ -312,7 +314,7 @@ function update_hoso_byid($conn, $id_hoso)
                     // nếu không tải sẽ lấy ảnh cũ
                     //$errors[] = 'Bạn chưa tải lên tệp học bạ.';
                     // Trong trường hợp chỉ cập nhật mà không tải ảnh mới lên
-                    $cccdPaths = json_decode($application["img_hoc_ba"], true);
+                    $transcriptsPaths = json_decode($application["img_hoc_ba"], true);
                 }
 
                 // Nếu có lỗi, lưu vào session và quay lại trang trước đó
@@ -328,6 +330,7 @@ function update_hoso_byid($conn, $id_hoso)
                     'score' => $jsonscore,
                     'img_cccd' => json_encode($cccdPaths),
                     'img_hoc_ba' => json_encode($transcriptsPaths),
+                    'status' => "pending",
                     //'subjects' => json_encode($subjectsData) 
                 ];
                 if (!empty($errors)) {

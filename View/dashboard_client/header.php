@@ -48,14 +48,13 @@
 
         <!-- Nav Item - Alerts -->
         <?php
-        //$top5_Notifications = top5_Notifications($conn);
         $tong_so_thong_bao  = countUnreadNotifications($conn);
         ?>
         <li class="nav-item dropdown no-arrow mx-1">
             <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fas fa-bell fa-fw"></i>
                 <!-- Counter - Alerts -->
-                <span id="notificationCounter" class="badge badge-danger badge-counter"><?= $tong_so_thong_bao ?></span>
+                <span id="notificationCounter" class="badge badge-danger badge-counter"><?php echo "thong bao" ?></span>
             </a>
 
             <!-- Dropdown - Alerts -->
@@ -63,75 +62,7 @@
                 <h6 class="dropdown-header">
                     Thông báo
                 </h6>
-                <!-- THÔNG BÁO CHO NGƯỜI KIỂM DUYỆT -->
-                <?php if (isset($_SESSION["user"]) && $_SESSION["user"]["role"] == 2) : ?>
-                    <?php
-                    $top5_Notifications = top5_Notifications($conn);
 
-                    foreach ($top5_Notifications as $notification) {
-                        $date = date("d/m/Y", strtotime($notification["created_at"]));
-                        $message = htmlspecialchars($notification["message"]);
-                        $full_name = htmlspecialchars($notification["full_name"]);
-                        $is_read = $notification["is_read"];
-                        $post_id = $notification["post_id"];
-                        $notification_id = $notification["id"];
-                    ?>
-
-                        <!-- thong báo cho người kiểm duyệt -->
-                        <?php if ($is_read == 1) : ?>
-                            <!-- Đã xem -->
-                            <a class="dropdown-item d-flex align-items-center read" href="index.php?act=post-detail&id=<?= $post_id ?>&notification_id<?= $notification_id  ?>">
-                                <div class="mr-3">
-                                    <div class="icon-circle bg-success">
-                                        <i class="fas fa-donate text-white"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="small text-gray-500"><?= $date ?></div>
-                                    <span class="font-weight-bold"><?= $message ?></span>
-                                    <br>
-                                    <span class="font-weight-bold text-primary"><?= $full_name ?></span>
-                                    <span class="badge badge-success badge-pill ml-2">Đã xem</span>
-                                </div>
-                            </a>
-                        <?php elseif ($is_read == 0) : ?>
-                            <!-- Chưa xem -->
-                            <a class="dropdown-item d-flex align-items-center unread" href="index.php?act=post-detail&id=<?= $post_id ?>&notification_id=<?= $notification_id  ?>">
-                                <div class="mr-3">
-                                    <div class="icon-circle bg-info">
-                                        <i class="fas fa-file-alt text-white"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="small text-gray-500"><?= $date ?></div>
-                                    <span class="font-weight-bold"><?= $message ?></span>
-                                    <br>
-                                    <span class="font-weight-bold text-primary"><?= $full_name ?></span>
-                                    <span class="badge badge-warning badge-pill ml-2">Chưa xem</span>
-                                </div>
-                            </a>
-                            <!-- THÔNG BÁO DÀNH CHO NGƯỜI TẠO BÀI VIẾT NẾU ĐƯỢC DUYỆT -->
-
-
-                        <?php endif; ?>
-
-                    <?php
-                    }
-                    ?>
-                    <!-- THÔNG BÁO CHO NGƯỜI TẠO NẾU BÀI ĐC PHÊ DUYỆT -->
-                <?php elseif (isset($_SESSION["user"]) && $_SESSION["user"]["role"] == 3) : ?>
-                    <a class="dropdown-item d-flex align-items-center" href="#">
-                        <div class="mr-3">
-                            <div class="icon-circle bg-warning">
-                                <i class="fas fa-exclamation-triangle text-white"></i>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="small text-gray-500">December 2, 2019</div>
-                            Spending Alert: We've noticed unusually high spending for your account.
-                        </div>
-                    </a>
-                <?php endif; ?>
                 <a class="dropdown-item text-center small text-gray-500" href="index.php?act=all-thong-bao">Show All Alerts</a>
             </div>
         </li>

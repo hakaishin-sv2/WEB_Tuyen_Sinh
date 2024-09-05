@@ -120,6 +120,7 @@
                 <a class="collapse-item" href="index.php?act=list-open-majors">Quản lý cổng tuyển sinh</a>
                 <!-- <a class="collapse-item" href="index.php?act=closed-majors">Các ngành chưa mở</a> -->
                 <a class="collapse-item" href="index.php?act=open-application">Mở cổng nhận hồ sơ</a>
+                <a class="collapse-item" href="index.php?act=thong-ke-ho-so">Thống kê hồ sơ</a>
             </div>
         </div>
     </li>

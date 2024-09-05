@@ -6,22 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Show All Alerts</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
         a:hover {
             text-decoration: none;
             color: inherit;
-            /* Đảm bảo màu chữ không thay đổi khi hover */
         }
 
         .list-group .alert-item:hover {
             background-color: #f8f9fc;
-            /* Màu nền khi hover */
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            /* Hiệu ứng bóng đổ */
             transform: translateY(-2px);
-            /* Di chuyển nhẹ lên trên */
         }
-
 
         .alert-item {
             border-bottom: 1px solid #e3e6f0;
@@ -35,12 +31,12 @@
         }
 
         .icon-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 2rem;
+            height: 2rem;
             display: flex;
             align-items: center;
             justify-content: center;
+            border-radius: 50%;
         }
 
         .bg-primary {
@@ -76,89 +72,178 @@
             color: #fff;
         }
 
-        .alert-item:hover {
+        .notification-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 5px 10px;
+            font-size: 0.75rem;
+        }
+
+        .unread {
             background-color: #f8f9fc;
+        }
+
+        .read {
+            background-color: #ffffff;
         }
     </style>
 </head>
 
 <body>
-    <div class="container mt-4">
-        <h1 class="mb-4">All Alerts</h1>
 
-        <!-- Chưa xem role người kiểm duyệt 3 người tạo bài mới làm người kiểm duyệt -->
-        <?php if ($_SESSION["user"]["role"] == 2) :  ?>
+    <div class="container mt-4">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+            <a class="navbar-brand" href="#">ĐH ABC</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav" style="margin-right: 3%;">
+                <ul class="navbar-nav mr-auto">
+                    <!-- Các mục khác (nếu có) sẽ được đặt ở đây -->
+                </ul>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php">Trang Chủ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#about">Giới Thiệu</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.php">Chương Trình</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Cá nhân
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="servicesDropdown">
+                            <?php if (isset($_SESSION["user"]) && $_SESSION["user"]["role"] == "teacher") : ?>
+                                <a class="dropdown-item" href="index.php?act=list-nop-ho-so-chua-duyet">Phê duyệt hồ sơ</a>
+                            <?php endif; ?>
+                            <?php if (isset($_SESSION["user"]) && $_SESSION["user"]["role"] == "student") : ?>
+                                <a class="dropdown-item" href="index.php?act=list-nop-ho-so-ca-nhan">Hồ sơ đã nộp</a>
+                            <?php endif; ?>
+                            <a class="dropdown-item" href="index.php?act=profile">Profile</a>
+                            <a class="dropdown-item" href="index.php?act=change-password">Đổi mật khẩu</a>
+                            <a class="dropdown-item" href="index.php?act=logout">Logout</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Khác</a>
+                        </div>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <?php if (!isset($_SESSION["user"])): ?>
+                            <a class="nav-link" href="#programs">Đăng ký</a>
+                        <?php endif; ?>
+                    </li>
+
+                    <?php
+                    // Thông báo
+                    $notificatios = get_all_thong_bao($conn, $_SESSION["user"]["id"]);
+                    $sl_thong_bao = $notificatios["unread_count"];
+                    $top5_thong_bao_moi_nhat = getUserNotifications_top5_new($conn, $_SESSION["user"]["id"], $limit = 5);
+                    ?>
+
+                    <li class="nav-item dropdown no-arrow mx-1">
+                        <a class="nav-link" href="#" id="alertsDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-bell fa-fw"></i>
+                            <span class="notification-badge"><?php echo $sl_thong_bao ?></span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
+                            <h6 class="dropdown-header">
+                                Trung Tâm Thông Báo
+                            </h6>
+                            <?php foreach ($top5_thong_bao_moi_nhat as $notification) {
+                                $is_read_class = $notification['is_read'] == 0 ? 'unread' : 'read';
+                                $badge_class = $notification['is_read'] == 0 ? 'badge-warning' : 'badge-success';
+                                $badge_text = $notification['is_read'] == 0 ? 'Chưa xem' : 'Đã xem';
+                                $created_at_formatted = date('d M, Y', strtotime($notification['created_at']));
+                            ?>
+                                <a class="dropdown-item d-flex align-items-center <?= $is_read_class; ?>" href="index.php?act=chi-tiet-ho-so&id_hoso=<?= $notification['application_id']; ?>&notification_id=<?= $notification['id'] ?>">
+                                    <div class="mr-3">
+                                        <div class="icon-circle <?= $is_read_class == 'unread' ? 'bg-primary' : 'bg-success'; ?>">
+                                            <i class="fas <?= $is_read_class == 'unread' ? 'fa-file-alt' : 'fa-check'; ?> text-white"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="text-muted small"><?= $created_at_formatted; ?></div>
+                                        <span class="font-weight-bold"><?= htmlspecialchars($notification['message']); ?></span>
+                                        <span class="badge <?= $badge_class; ?> badge-pill ml-2"><?= $badge_text; ?></span>
+                                    </div>
+                                </a>
+                            <?php } ?>
+                            <a class="dropdown-item text-center small text-muted" href="index.php?act=all-thong-bao">Xem Tất Cả Thông Báo</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <h1 class="mb-4">Tất cả Thông Báo</h1>
+
+        <?php
+        // Dữ liệu thông báo
+        $Thong_bao_chua_xem = $notifications["unread_notifications"];
+        $Thong_bao_da_xem = $notifications["read_notifications"];
+        ?>
+
+        <!-- Thông báo chưa xem -->
+        <?php if ($_SESSION["user"]["role"] === "student") : ?>
             <h2 class="mb-3">Chưa xem</h2>
             <?php foreach ($Thong_bao_chua_xem as $notification) : ?>
                 <?php
                 $date = date('d/m/Y', strtotime($notification['created_at']));
                 $message = htmlspecialchars($notification['message']);
-                $is_read = $notification['is_read'];
-                $notification_id = htmlspecialchars($notification['id']);
-                $post_id = htmlspecialchars($notification['post_id']);
-                $full_name = htmlspecialchars($notification['full_name']);
+                $is_read_class = $notification['is_read'] == 0 ? 'unread' : '';
                 ?>
                 <div class="list-group">
-                    <a class="alert-item d-flex align-items-center <?= $is_read == 0 ? 'unread' : '' ?>" href="index.php?act=post-detail&id=<?= $post_id ?>&notification_id=<?= $notification_id ?>">
+                    <a class="dropdown-item d-flex align-items-center <?= $is_read_class; ?>" href="index.php?act=chi-tiet-ho-so&id_hoso=<?= $notification['application_id']; ?>&notification_id=<?= $notification['id']; ?>">
                         <div class="mr-3">
-                            <div class="icon-circle <?= $is_read == 0 ? '' : 'bg-success' ?>">
-                                <i class="fas fa-file-alt text-white"></i>
+                            <div class="icon-circle bg-primary">
+                                <i class="fas fa-exclamation-circle text-white"></i>
                             </div>
                         </div>
                         <div>
-                            <div class="small text-gray-500"><?= $date ?></div>
-                            <span class="font-weight-bold"><?= $message ?></span>
-                            <br>
-                            <span class="font-weight-bold text-primary"><?= $full_name ?></span>
-                            <span class="alert-status <?= $is_read == 0 ? 'unread' : 'read' ?>">
-                                <?= $is_read == 0 ? 'Chưa xem' : 'Đã xem' ?>
-                            </span>
+                            <div class="text-muted small"><?= $date; ?></div>
+                            <span class="font-weight-bold"><?= $message; ?></span>
                         </div>
                     </a>
                 </div>
             <?php endforeach; ?>
-
-
-        <?php elseif ($_SESSION["user"]["role"] == 3) :  ?>
-            <!-- Thêm các thông báo "Chưa xem" của người viết bài -->
         <?php endif; ?>
 
-        <!-- Đã xem -->
-
-        <?php if ($_SESSION["user"]["role"] == 2) :  ?>
-            <h2 class="mt-4 mb-3">Đã xem</h2>
+        <!-- Thông báo đã xem -->
+        <?php if ($_SESSION["user"]["role"] === "student") : ?>
+            <h2 class="mb-3 mt-5">Đã xem</h2>
             <?php foreach ($Thong_bao_da_xem as $notification) : ?>
                 <?php
                 $date = date('d/m/Y', strtotime($notification['created_at']));
                 $message = htmlspecialchars($notification['message']);
-                $notification_id = htmlspecialchars($notification['id']);
-                $post_id = htmlspecialchars($notification['post_id']);
+                $is_read_class = $notification['is_read'] == 0 ? 'unread' : 'read';
                 ?>
                 <div class="list-group">
-                    <a class="alert-item d-flex align-items-center" href="index.php?act=post-detail&id=<?= $post_id ?>&notification_id=<?= $notification_id ?>">
+                    <a class="dropdown-item d-flex align-items-center <?= $is_read_class; ?>" href="index.php?act=chi-tiet-ho-so&id_hoso=<?= $notification['application_id']; ?>&notification_id=<?= $notification['id']; ?>">
                         <div class="mr-3">
-                            <div class="icon-circle ">
-                                <i class="fas fa-donate text-white"></i>
+                            <div class="icon-circle bg-success">
+                                <i class="fas fa-check-circle text-white"></i>
                             </div>
                         </div>
                         <div>
-                            <div class="small text-gray-500"><?= $date ?></div>
-                            <?= $message ?>
-                            <span class="alert-status read">Đã xem</span>
+                            <div class="text-muted small"><?= $date; ?></div>
+                            <span class="font-weight-bold"><?= $message; ?></span>
                         </div>
                     </a>
                 </div>
             <?php endforeach; ?>
-        <?php elseif ($_SESSION["user"]["role"] == 3) :  ?>
-            <!-- Thêm các thông báo "Đã xem" của người viết bài -->
         <?php endif; ?>
-
     </div>
 
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
 </body>
 
 </html>

@@ -2,8 +2,27 @@
 
 function getListCacNamXetTuyen($conn)
 {
-    $list =  getListTable($conn, "programs");
+    $list = getProgramsOrderedByStartDate($conn);
     require_once PATH_VIEW_ADMIN . 'list-tuyen-sinh-cac-nam.php';
+}
+// thống kê hồ sơ
+function thong_ke_ho_so_cac_nam($conn)
+{
+    $list = getProgramsOrderedByStartDate($conn);
+    require_once PATH_VIEW_ADMIN . 'thong-ke-hosocacnam.php';
+}
+
+function thong_ke_ho_so_theo_nam_va_nganh($conn, $year)
+{
+    $statistics = getApplicationsStatisticsByMajor($conn, $year);
+    require_once PATH_VIEW_ADMIN . 'thong-ke-theo-nganh.php';
+}
+
+function thong_ke_ho_so_tong_quan($conn, $year)
+{
+    $statistics = getApplicationsStatisticsByMajor($conn, $year);
+    $applicationStats = getApplicationStatistics($conn, $year);
+    require_once PATH_VIEW_ADMIN . 'thong-ke-tong-quan.php';
 }
 
 function chi_tiet_tuyen_sinh_by_year($conn, $year)
@@ -39,8 +58,8 @@ function mo_cong_tuyen_sinh_one_create($conn)
             exit();
         }
         // Dữ liệu để chèn vào bảng programs
-        // $currentYear = date('Y');
-        $currentYear = 2022;
+        $currentYear = date('Y');
+        // $currentYear = 2022;
         $data = [
             'name' => $name,
             'start_date' => $start_date,
@@ -261,6 +280,7 @@ function hienHoSoTheoNganh($conn, $id, $year)
 function NhapDiemTrungTuyen($conn, $id_pm)
 {
     $list = getProgramDetails_byID($conn, $id_pm); // Lấy chi tiết ngành theo ID
+    $list_user_dangky = get_applications_by_program_and_major($conn, $list[0]["program_id"], $list[0]["major_id"]);
 
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Kiểm tra xem có dữ liệu từ mảng 'diem' được gửi lên hay không
@@ -273,7 +293,6 @@ function NhapDiemTrungTuyen($conn, $id_pm)
             }
             $stmt->bind_param("i", $id_pm);
 
-            // Khai báo biến để nhận dữ liệu từ câu truy vấn
             $currentScoresJson = null;
             $stmt->execute();
             $stmt->bind_result($currentScoresJson);
@@ -291,7 +310,7 @@ function NhapDiemTrungTuyen($conn, $id_pm)
             }
 
             // Xem điểm khi chuyển JSON về mảng
-            print_r($currentScores);
+            print_r($currentScores); // Điểm cũ
 
             // Bước 3: Kiểm tra dữ liệu gửi lên
             $postedScores = $_POST['diem'] ?? [];
@@ -310,7 +329,7 @@ function NhapDiemTrungTuyen($conn, $id_pm)
             // Kiểm tra giá trị điểm nhập vào
             foreach ($postedScores as $field => $diem) {
                 if (!is_numeric($diem) || $diem < 15 || $diem > 30) {
-                    $_SESSION['errors'][] = "Điểm nhập vào phải nằm trong khoảng từ 15 đến 30. Và cần nhập hét điểm trúng tuyển";
+                    $_SESSION['errors'][] = "Điểm nhập vào phải nằm trong khoảng từ 15 đến 30. Và cần nhập hết điểm trúng tuyển";
                     $isValid = false;
                     break;
                 }
@@ -323,7 +342,6 @@ function NhapDiemTrungTuyen($conn, $id_pm)
                 exit();
             }
 
-
             // Bước 4: Cập nhật mảng điểm với điểm mới từ POST
             foreach ($postedScores as $khoi => $diem) {
                 $currentScores[$khoi] = $diem;
@@ -331,6 +349,7 @@ function NhapDiemTrungTuyen($conn, $id_pm)
 
             // Bước 5: Mã hóa lại mảng thành JSON
             $newScoresJson = json_encode($currentScores);
+            print_r($newScoresJson);
 
             // Bước 6: Lưu JSON đã cập nhật vào cơ sở dữ liệu
             $sql = "UPDATE program_majors SET cut_off_score = ? WHERE id = ?";
@@ -343,6 +362,18 @@ function NhapDiemTrungTuyen($conn, $id_pm)
             $stmt->close();
 
             $_SESSION['success'] = "Cập nhật điểm trúng tuyển thành công.";
+
+            // Bước 7: Thêm thông báo cho các ứng viên insert vào bảng thông báo cho các user nào đã nộp hồ sơ cho ngành này
+            $notificationMessage = "Điểm trúng tuyển cho chương trình đã được cập nhật. Vui lòng kiểm tra.";
+            foreach ($list_user_dangky as $application) {
+                $data = [
+                    'user_id' => $application["user_id"],
+                    'application_id' => $application['application_id'],
+                    'message' => $notificationMessage,
+                ];
+                insert($conn, "notifications ", $data);
+            }
+
             // Chuyển hướng đến trang kết quả hoặc thông báo thành công
             header("Location: index.php?act=show-tuyen-sinh&year=" . (isset($_GET['year']) ? htmlspecialchars($_GET['year']) : ''));
             exit();

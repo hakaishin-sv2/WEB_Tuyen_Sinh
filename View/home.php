@@ -29,7 +29,7 @@
 
         /* Tiêu đề chính */
         .hero-section {
-            background-image: url('hero-background.jpg');
+            /* // background-image: url('hero-background.jpg'); */
             /* Thay thế bằng đường dẫn đến ảnh của bạn */
             background-size: cover;
             background-position: center;
@@ -170,20 +170,25 @@
             </ul>
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="#home">Trang Chủ</a>
+                    <a class="nav-link" href="index.php">Trang Chủ</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#about">Giới Thiệu</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#programs">Chương Trình</a>
+                    <a class="nav-link" href="index.php">Chương Trình</a>
                 </li>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Cá nhân
                     </a>
                     <div class="dropdown-menu" aria-labelledby="servicesDropdown">
-                        <a class="dropdown-item" href="index.php?act=list-nop-ho-so-ca-nhan">Hồ sơ đã nộp</a>
+                        <?php if (isset($_SESSION["user"]) && $_SESSION["user"]["role"] == "teacher") : ?>
+                            <a class="dropdown-item" href="index.php?act=list-nop-ho-so-chua-duyet">Phê duyệt hồ sơ</a>
+                        <?php endif;   ?>
+                        <?php if (isset($_SESSION["user"]) && $_SESSION["user"]["role"] == "student") : ?>
+                            <a class="dropdown-item" href="index.php?act=list-nop-ho-so-ca-nhan">Hồ sơ đã nộp</a>
+                        <?php endif;   ?>
                         <a class="dropdown-item" href="index.php?act=profile">Profile</a>
                         <a class="dropdown-item" href="index.php?act=change-password">Đổi mật khẩu</a>
                         <a class="dropdown-item" href="index.php?act=logout">Logout</a>
@@ -191,63 +196,67 @@
                         <a class="dropdown-item" href="#">Khác</a>
                     </div>
                 </li>
+
+                <li class="nav-item dropdown">
+                    <?php
+                    if (!isset($_SESSION["user"])): // Đóng dấu ngoặc tròn và bỏ dấu ':' thừa
+                    ?>
                 <li class="nav-item dropdown">
                     <a class="nav-link" href="#programs">Đăng ký</a>
                 </li>
-                <li class="nav-item dropdown no-arrow mx-1">
-                    <a class="nav-link " href="#" id="alertsDropdown" role="button"
-                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="fas fa-bell fa-fw"></i>
-                        <!-- Counter - Alerts -->
-                        <span class="notification-badge">3</span>
-                    </a>
-                    <!-- Dropdown - Alerts -->
-                    <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
-                        <h6 class="dropdown-header">
-                            Trung Tâm Thông Báo
-                        </h6>
-                        <!-- Thông báo chưa xem -->
-                        <a class="dropdown-item d-flex align-items-center unread" href="#">
+            <?php
+                    endif;
+            ?>
+            </li>
+            <?php
+            // thong báo
+            $notificatios =  get_all_thong_bao($conn, $_SESSION["user"]["id"]);
+            $sl_thong_bao = $notificatios["unread_count"];
+            $top5_thong_bao_moi_nhat = getUserNotifications_top5_new($conn, $_SESSION["user"]["id"], $limit = 5);
+            //print_r($top5_thong_bao_moi_nhat);
+            // print_r($x["unread_notifications"]);
+            ?>
+            <li class="nav-item dropdown no-arrow mx-1">
+                <a class="nav-link " href="#" id="alertsDropdown" role="button"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <i class="fas fa-bell fa-fw"></i>
+                    <!-- Counter - Alerts -->
+                    <span class="notification-badge"><?php echo $sl_thong_bao ?></span>
+                </a>
+                <!-- Dropdown - Alerts -->
+                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
+                    <h6 class="dropdown-header">
+                        Trung Tâm Thông Báo
+                    </h6>
+                    <?php
+                    foreach ($top5_thong_bao_moi_nhat as $notification) {
+                        $is_read_class = $notification['is_read'] == 0 ? 'unread' : 'read';
+                        $badge_class = $notification['is_read'] == 0 ? 'badge-warning' : 'badge-success';
+                        $badge_text = $notification['is_read'] == 0 ? 'Chưa xem' : 'Đã xem';
+                        $created_at_formatted = date('d M, Y', strtotime($notification['created_at']));
+                    ?>
+                        <a class="dropdown-item d-flex align-items-center
+                         <?= $is_read_class; ?>" href="index.php?act=chi-tiet-ho-so&id_hoso=<?= $notification['application_id']; ?>&notification_id=<?= $notification['id']  ?>">
                             <div class="mr-3">
-                                <div class="icon-circle bg-primary">
-                                    <i class="fas fa-file-alt text-white"></i>
+                                <div class="icon-circle <?= $is_read_class == 'unread' ? 'bg-primary' : 'bg-success'; ?>">
+                                    <i class="fas <?= $is_read_class == 'unread' ? 'fa-file-alt' : 'fa-donate'; ?> text-white"></i>
                                 </div>
                             </div>
                             <div>
-                                <div class="text-muted small">12 Tháng 12, 2019</div>
-                                <span class="font-weight-bold">Báo cáo hàng tháng mới đã sẵn sàng để tải xuống!</span>
-                                <span class="badge badge-success badge-pill ml-2">Đã xem</span>
+                                <div class="text-muted small"><?= $created_at_formatted; ?></div>
+                                <span class="font-weight-bold"><?= $notification['message']; ?></span>
+                                <span class="badge <?= $badge_class; ?> badge-pill ml-2"><?= $badge_text; ?></span>
                             </div>
                         </a>
-                        <!-- Thông báo đã xem -->
-                        <a class="dropdown-item d-flex align-items-center read" href="#">
-                            <div class="mr-3">
-                                <div class="icon-circle bg-success">
-                                    <i class="fas fa-donate text-white"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="text-muted small">7 Tháng 12, 2019</div>
-                                $290.29 đã được chuyển vào tài khoản của bạn!
-                            </div>
-                        </a>
-                        <!-- Thông báo chưa xem -->
-                        <a class="dropdown-item d-flex align-items-center unread" href="#">
-                            <div class="mr-3">
-                                <div class="icon-circle bg-warning">
-                                    <i class="fas fa-exclamation-triangle text-white"></i>
-                                </div>
-                            </div>
-                            <div>
-                                <div class="text-muted small">2 Tháng 12, 2019</div>
-                                Cảnh báo Chi Tiêu: Chúng tôi đã nhận thấy chi tiêu bất thường cho tài khoản của bạn.
-                            </div>
-                        </a>
-                        <a class="dropdown-item text-center small text-muted" href="#">Xem Tất Cả Thông Báo</a>
-                    </div>
+                    <?php
+                    }
+                    ?>
+                    <a class="dropdown-item text-center small text-muted" href="index.php?act=all-thong-bao">Xem Tất Cả Thông Báo</a>
+                </div>
 
 
-                </li>
+
+            </li>
             </ul>
         </div>
     </nav>
@@ -334,8 +343,8 @@
                         <ul class="pagination">
                             <!-- Trang trước -->
                             <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                                <a class="page-link" href="<?= ($page > 1) ? '?page=' . ($page - 1) : '#' ?>" aria-label="Previous">
-                                    <span aria-hidden="true">&laquo;</span>
+                                <a class="page-link" href="#" id="prev-page" aria-label="Previous">
+                                    <span aria-hidden="false">&laquo;</span>
                                 </a>
                             </li>
 
@@ -348,7 +357,7 @@
 
                             <!-- Trang sau -->
                             <li class="page-item <?= ($page >= $totalPages) ? 'disabled' : '' ?>">
-                                <a class="page-link" href="<?= ($page < $totalPages) ? '?page=' . ($page + 1) : '#' ?>" aria-label="Next">
+                                <a class="page-link" href="#" id="next-page" aria-label="Next">
                                     <span aria-hidden="true">&raquo;</span>
                                 </a>
                             </li>
@@ -356,6 +365,7 @@
                     </nav>
                 </div>
             </div>
+
 
         </div>
     </section>
@@ -409,6 +419,40 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Lấy tham số 'page' từ URL
+        function getQueryParameter(param) {
+            let urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param) ? parseInt(urlParams.get(param)) : 1; // Mặc định trả về 1 nếu không có tham số page
+        }
+
+        // Chuyển hướng trang với số trang mới
+        function goToPage(page) {
+            window.location.href = "?page=" + page;
+        }
+
+        // Bắt sự kiện click cho nút "<<"
+        document.getElementById('prev-page').addEventListener('click', function(e) {
+            e.preventDefault(); // Ngăn sự kiện mặc định
+
+            let currentPage = getQueryParameter('page'); // Lấy trang hiện tại
+            if (currentPage > 1) {
+                goToPage(currentPage - 1); // Chuyển sang trang trước
+            }
+        });
+
+        // Bắt sự kiện click cho nút ">>"
+        document.getElementById('next-page').addEventListener('click', function(e) {
+            e.preventDefault(); // Ngăn sự kiện mặc định
+
+            let currentPage = getQueryParameter('page'); // Lấy trang hiện tại
+            let totalPages = <?= $totalPages ?>; // Tổng số trang từ PHP
+
+            if (currentPage < totalPages) {
+                goToPage(currentPage + 1); // Chuyển sang trang tiếp theo
+            }
+        });
+    </script>
 </body>
 
 </html>

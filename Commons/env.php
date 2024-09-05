@@ -12,3 +12,5 @@ define('PATH_CONTROLLER_ADMIN', __DIR__ . '/../admin/controller/');
 define('PATH_MODEL_ADMIN', __DIR__ . '/../admin/model/');
 define('PATH_VIEW_ADMIN', __DIR__ . '/../admin/view/');
 define('BASE_URL_ADMIN', 'http://localhost/web_tuyen_sinh/admin');
+
+define('BASE_URL_TEACHER', 'http://localhost/web_tuyen_sinh/index.php?act=list-nop-ho-so-chua-duyet');

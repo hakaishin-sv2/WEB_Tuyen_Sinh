@@ -247,6 +247,28 @@ switch ($act) {
         }
 
         break;
+        // Thống kê hồ sơ các năm
+    case 'thong-ke-ho-so': // danh cách năm tuyển sinh 
+        thong_ke_ho_so_cac_nam($conn);
+        break;
+    case 'thong-ke-tong-quan': // danh cách năm tuyển sinh 
+        if (isset($_GET['year'])) {
+            thong_ke_ho_so_tong_quan($conn,  $_GET['year']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+
+        break;
+        // case 'thong-ke-cu-the': // danh cách năm tuyển sinh 
+        //     if (isset($_GET['year'])) {
+        //         thong_ke_ho_so_theo_nam_va_nganh($conn, $_GET['year']);
+        //     } else {
+        //         echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+        //         require_once PATH_VIEW_ADMIN . '404.php';
+        //     }
+
+        //     break;
     case 'test':
         TestIndex($conn);
         break;

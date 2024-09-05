@@ -113,21 +113,20 @@
     <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePost" aria-expanded="true" aria-controls="collapsePost">
             <i class="fas fa-newspaper"></i>
-            <span>Quản lý bài viết</span>
+            <span>Duyệt hồ sơ</span>
         </a>
         <div id="collapsePost" class="collapse" aria-labelledby="headingPost" data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Chức năng quản lý bài viết:</h6>
-                <a class="collapse-item" href="index.php?act=list-posts">Danh sách bài viết</a>
-                <?php if (isset($_SESSION["user"]) && $_SESSION["user"]["role"] == 3) : ?>
-                    <a class="collapse-item" href="index.php?act=post-create">Thêm mới bài viết</a>
-                <?php endif;   ?>
+                <h6 class="collapse-header">Hồ Sơ Tuyển Sinh:</h6>
+                <a class="collapse-item" href="index.php?act=list-nop-ho-so-chua-duyet">Hồ sơ chưa duyệt</a>
+                <a class="collapse-item" href="index.php?act=list-ho-so-rejected">Hồ sơ bị hủy</a>
+                <a class="collapse-item" href="index.php?act=list-ho-so-daduyet">Hồ sơ đã duyệt</a>
             </div>
         </div>
     </li>
 
     <!-- Nav Item - Tag-manager -->
-    <li class="nav-item">
+    <!-- <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTag" aria-expanded="true" aria-controls="collapseTag">
             <i class="fas fa-tags"></i>
             <span>Quản lý thẻ Tags</span>
@@ -139,7 +138,7 @@
                 <a class="collapse-item" href="index.php?act=tag-create">Thêm mới thẻ</a>
             </div>
         </div>
-    </li>
+    </li> -->
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">

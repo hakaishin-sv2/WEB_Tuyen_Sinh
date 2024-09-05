@@ -25,6 +25,9 @@ function LoginForm_user($conn)
         if ($user_login["role"] == "admin") {
             header('Location: ' . BASE_URL_ADMIN);
             exit();
+        } elseif ($user_login["role"] == "teacher") {
+            header('Location: ' . BASE_URL_TEACHER);
+            exit();
         } else {
             header('Location: ' . BASE_URL_CLIENT);
             exit();

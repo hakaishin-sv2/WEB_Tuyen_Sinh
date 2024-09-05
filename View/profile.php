@@ -27,14 +27,14 @@
                     <?php
                     $role = (int)$_SESSION['user']['role'];
                     switch ($role) {
-                        case 0:
-                            echo '<span class="badge bg-secondary text-white">Member</span>';
+                        case "student":
+                            echo '<span class="badge bg-secondary text-white">User</span>';
                             break;
-                        case 1:
+                        case "admin":
                             echo '<span class="badge bg-primary text-white">Admin</span>';
                             break;
-                        case 2:
-                            echo '<span class="badge bg-warning text-dark">Người kiểm duyệt</span>';
+                        case "teacher":
+                            echo '<span class="badge bg-warning text-dark">Người kiểm duyệt hồ sơ</span>';
                             break;
                         case 3:
                             echo '<span class="badge bg-info text-white">Editor</span>';
