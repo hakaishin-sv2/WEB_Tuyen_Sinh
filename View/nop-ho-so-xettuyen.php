@@ -175,96 +175,99 @@
             </ul>
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="#home">Trang Chủ</a>
+                    <a class="nav-link" href="index.php">Trang Chủ</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#about">Giới Thiệu</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#programs">Chương Trình</a>
+                    <a class="nav-link" href="index.php">Chương Trình</a>
                 </li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Cá nhân
-                    </a>
-                    <div class="dropdown-menu" aria-labelledby="servicesDropdown">
-                        <?php if (isset($_SESSION["user"]) && $_SESSION["user"]["role"] == "teacher") : ?>
-                            <a class="dropdown-item" href="index.php?act=list-nop-ho-so-chua-duyet">Phê duyệt hồ sơ</a>
-                        <?php endif;   ?>
-                        <?php if (isset($_SESSION["user"]) && $_SESSION["user"]["role"] == "student") : ?>
-                            <a class="dropdown-item" href="index.php?act=list-nop-ho-so-ca-nhan">Hồ sơ đã nộp</a>
-                        <?php endif;   ?>
-                        <a class="dropdown-item" href="index.php?act=profile">Profile</a>
-                        <a class="dropdown-item" href="index.php?act=change-password">Đổi mật khẩu</a>
-                        <a class="dropdown-item" href="index.php?act=logout">Logout</a>
-                        <div class="dropdown-divider"></div>
-                        <a class="dropdown-item" href="#">Khác</a>
-                    </div>
-                </li>
+                <?php if (isset($_SESSION["user"])) : ?>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Cá nhân
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="servicesDropdown">
+                            <?php if ($_SESSION["user"]["role"] == "teacher") : ?>
+                                <a class="dropdown-item" href="index.php?act=list-nop-ho-so-chua-duyet">Phê duyệt hồ sơ</a>
+                            <?php endif; ?>
+                            <?php if ($_SESSION["user"]["role"] == "student") : ?>
+                                <a class="dropdown-item" href="index.php?act=list-nop-ho-so-ca-nhan">Hồ sơ đã nộp</a>
+                            <?php endif; ?>
+                            <a class="dropdown-item" href="index.php?act=profile">Profile</a>
+                            <a class="dropdown-item" href="index.php?act=change-password">Đổi mật khẩu</a>
+                            <a class="dropdown-item" href="index.php?act=logout">Logout</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Khác</a>
+                        </div>
+                    </li>
+                <?php endif; ?>
 
                 <li class="nav-item dropdown">
                     <?php
                     if (!isset($_SESSION["user"])): // Đóng dấu ngoặc tròn và bỏ dấu ':' thừa
                     ?>
                 <li class="nav-item dropdown">
-                    <a class="nav-link" href="#programs">Đăng ký</a>
+                    <a class="nav-link" href="index.php?act=login">Đăng ký</a>
                 </li>
             <?php
                     endif;
             ?>
             </li>
+
             <?php
-            // thong báo
-            $notificatios =  get_all_thong_bao($conn, $_SESSION["user"]["id"]);
-            $sl_thong_bao = $notificatios["unread_count"];
-            $top5_thong_bao_moi_nhat = getUserNotifications_top5_new($conn, $_SESSION["user"]["id"], $limit = 5);
-            //print_r($top5_thong_bao_moi_nhat);
-            // print_r($x["unread_notifications"]);
+            if (isset($_SESSION["user"])) {
+                $notificatios = get_all_thong_bao($conn, $_SESSION["user"]["id"]);
+                $sl_thong_bao = $notificatios["unread_count"];
+                $top5_thong_bao_moi_nhat = getUserNotifications_top5_new($conn, $_SESSION["user"]["id"], $limit = 5);
             ?>
-            <li class="nav-item dropdown no-arrow mx-1">
-                <a class="nav-link " href="#" id="alertsDropdown" role="button"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-bell fa-fw"></i>
-                    <!-- Counter - Alerts -->
-                    <span class="notification-badge"><?php echo $sl_thong_bao ?></span>
-                </a>
-                <!-- Dropdown - Alerts -->
-                <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
-                    <h6 class="dropdown-header">
-                        Trung Tâm Thông Báo
-                    </h6>
-                    <?php
-                    foreach ($top5_thong_bao_moi_nhat as $notification) {
-                        $is_read_class = $notification['is_read'] == 0 ? 'unread' : 'read';
-                        $badge_class = $notification['is_read'] == 0 ? 'badge-warning' : 'badge-success';
-                        $badge_text = $notification['is_read'] == 0 ? 'Chưa xem' : 'Đã xem';
-                        $created_at_formatted = date('d M, Y', strtotime($notification['created_at']));
-                    ?>
-                        <a class="dropdown-item d-flex align-items-center
-                         <?= $is_read_class; ?>" href="index.php?act=chi-tiet-ho-so&id_hoso=<?= $notification['application_id']; ?>&notification_id=<?= $notification['id']  ?>">
-                            <div class="mr-3">
-                                <div class="icon-circle <?= $is_read_class == 'unread' ? 'bg-primary' : 'bg-success'; ?>">
-                                    <i class="fas <?= $is_read_class == 'unread' ? 'fa-file-alt' : 'fa-donate'; ?> text-white"></i>
+                <li class="nav-item dropdown no-arrow mx-1">
+                    <a class="nav-link" href="#" id="alertsDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-bell fa-fw"></i>
+                        <!-- Counter - Alerts -->
+                        <span class="notification-badge"><?php echo $sl_thong_bao; ?></span>
+                    </a>
+                    <!-- Dropdown - Alerts -->
+                    <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">
+                        <h6 class="dropdown-header">
+                            Trung Tâm Thông Báo
+                        </h6>
+                        <?php
+                        foreach ($top5_thong_bao_moi_nhat as $notification) {
+                            $is_read_class = $notification['is_read'] == 0 ? 'unread' : 'read';
+                            $badge_class = $notification['is_read'] == 0 ? 'badge-warning' : 'badge-success';
+                            $badge_text = $notification['is_read'] == 0 ? 'Chưa xem' : 'Đã xem';
+                            $created_at_formatted = date('d M, Y', strtotime($notification['created_at']));
+                        ?>
+                            <a class="dropdown-item d-flex align-items-center <?= $is_read_class; ?>"
+                                href="index.php?act=chi-tiet-ho-so&id_hoso=<?= $notification['application_id']; ?>&notification_id=<?= $notification['id']; ?>">
+                                <div class="mr-3">
+                                    <div class="icon-circle <?= $is_read_class == 'unread' ? 'bg-primary' : 'bg-success'; ?>">
+                                        <i class="fas <?= $is_read_class == 'unread' ? 'fa-file-alt' : 'fa-donate'; ?> text-white"></i>
+                                    </div>
                                 </div>
-                            </div>
-                            <div>
-                                <div class="text-muted small"><?= $created_at_formatted; ?></div>
-                                <span class="font-weight-bold"><?= $notification['message']; ?></span>
-                                <span class="badge <?= $badge_class; ?> badge-pill ml-2"><?= $badge_text; ?></span>
-                            </div>
-                        </a>
-                    <?php
-                    }
-                    ?>
-                    <a class="dropdown-item text-center small text-muted" href="index.php?act=all-thong-bao">Xem Tất Cả Thông Báo</a>
-                </div>
+                                <div>
+                                    <div class="text-muted small"><?= $created_at_formatted; ?></div>
+                                    <span class="font-weight-bold"><?= $notification['message']; ?></span>
+                                    <span class="badge <?= $badge_class; ?> badge-pill ml-2"><?= $badge_text; ?></span>
+                                </div>
+                            </a>
+                        <?php
+                        }
+                        ?>
+                        <a class="dropdown-item text-center small text-muted" href="index.php?act=all-thong-bao">Xem Tất Cả Thông Báo</a>
+                    </div>
+                </li>
+            <?php
+            }
+            ?>
 
-
-
-            </li>
             </ul>
         </div>
     </nav>
+
 
     <!-- Tiêu đề Chương Trình -->
     <header class="hero-section">
