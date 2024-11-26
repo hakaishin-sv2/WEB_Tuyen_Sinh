@@ -273,3 +273,283 @@ function getApplicationsStatisticsByMajor($conn, $year)
 
     return $statistics;
 }
+
+// LẤY DANH SÁCH CÁC HỒ SƠ MÀ GIÁO VIÊN CHƯA DUYỆT HAY ĐÃ DUYỆT
+/*
+SELECT 
+    a.id AS application_id,
+    a.score,
+    a.status,
+    a.reviewer_by_id,
+    p.name AS program_name,
+    m.industry_code,
+    m.ten_nganh,
+    u.full_name AS reviewer_name,
+    u.email AS reviewer_email,
+    applicant.full_name AS applicant_name,
+    applicant.email AS applicant_email
+FROM 
+    applications a
+LEFT JOIN 
+    programs p ON a.program_id = p.id
+LEFT JOIN 
+    majors m ON a.major_id = m.id
+LEFT JOIN 
+    users u ON a.reviewer_by_id = u.id
+LEFT JOIN 
+    users applicant ON a.user_id = applicant.id
+INNER JOIN 
+    teacher_assignment ta ON a.major_id = ta.major_id
+WHERE 
+    ta.teacher_id = 5;
+
+
+*/
+
+function getApplicationsByTeacher($conn, $teacherId)
+{
+    $sql = "
+        SELECT 
+            a.id AS application_id,
+            a.score,
+            a.status,
+            a.created_at,
+            a.reviewer_by_id,
+            p.name AS program_name,
+            m.industry_code,
+            m.ten_nganh,
+            u.full_name AS reviewer_name,
+            u.email AS reviewer_email,
+            applicant.full_name AS applicant_name,
+            applicant.email AS applicant_email
+        FROM 
+            applications a
+        LEFT JOIN 
+            programs p ON a.program_id = p.id
+        LEFT JOIN 
+            majors m ON a.major_id = m.id
+        LEFT JOIN 
+            users u ON a.reviewer_by_id = u.id
+        LEFT JOIN 
+            users applicant ON a.user_id = applicant.id
+        INNER JOIN 
+            teacher_assignment ta ON a.major_id = ta.major_id
+        WHERE 
+            ta.teacher_id = ?;
+    ";
+
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        die("Lỗi chuẩn bị truy vấn: " . $conn->error);
+    }
+
+    $stmt->bind_param("i", $teacherId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $applications = [];
+    while ($row = $result->fetch_assoc()) {
+        $applications[] = $row;
+    }
+
+    $stmt->close();
+    return $applications;
+}
+
+function getDetailApplicationById_admin($id_hoso, $conn)
+{
+    $sql = "
+        SELECT 
+            p.year,
+            p.name as te_kytuyensinh,
+            a.id,
+            a.user_id,
+            a.major_id,
+            a.created_at,
+            a.score,
+            a.status,
+            a.img_cccd,
+            a.img_hoc_ba,
+            a.phone,
+            a.address,
+            m.industry_code,
+            m.ten_nganh
+        FROM 
+            applications a
+        JOIN 
+            programs p ON a.program_id = p.id
+        JOIN 
+            majors m ON a.major_id = m.id
+        WHERE 
+            a.id = ?
+    ";
+
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param('i', $id_hoso);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $applicationDetail = $result->fetch_assoc();
+        } else {
+            $applicationDetail = null;
+        }
+
+        $stmt->close();
+        return $applicationDetail;
+    } else {
+        return null;
+    }
+}
+
+// Chỗ phần thống kê khi ấn vào các oo màu xanh vàng đỏ
+
+//Lấy danh sách các hồ sơ bị hủy lấy đủ thông tin
+
+/*
+SELECT 
+    a.*, 
+    u.full_name AS applicant_name, 
+    u.email AS applicant_email, 
+    m.industry_code, 
+    m.ten_nganh, 
+    r.full_name AS reviewer_name, 
+    r.email AS reviewer_email
+FROM 
+    applications a
+JOIN 
+    programs p ON p.id = a.program_id
+JOIN 
+    users u ON a.user_id = u.id
+JOIN 
+    majors m ON a.major_id = m.id
+LEFT JOIN 
+    users r ON a.reviewer_by_id = r.id
+WHERE 
+    a.status = 'rejected' 
+    AND p.year = YEAR(CURDATE());
+
+*/
+
+// Phần thống kê
+
+function get_status_hoso_by_year($conn, $status, $year)
+{
+    $sql = "SELECT 
+                a.*, 
+                u.full_name AS applicant_name, 
+                u.email AS applicant_email, 
+                m.industry_code, 
+                m.ten_nganh, 
+                r.full_name AS reviewer_name, 
+                r.email AS reviewer_email
+            FROM 
+                applications a
+            JOIN 
+                programs p ON p.id = a.program_id
+            JOIN 
+                users u ON a.user_id = u.id
+            JOIN 
+                majors m ON a.major_id = m.id
+            LEFT JOIN 
+                users r ON a.reviewer_by_id = r.id
+            WHERE 
+                a.status = ? 
+                AND p.year = ?";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("si", $status, $year);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $applications = [];
+    while ($row = $result->fetch_assoc()) {
+        $applications[] = $row;
+    }
+
+    $stmt->close();
+    return $applications;
+}
+
+
+// Thống kê hồ sơ các ngành đã duyệt theo năm
+// để lấy ra có bao nhiêu hồ sơ trúng tuyển bao hồ sơ bị trượt
+function get_approved_applications_by_year($year, $conn)
+{
+    // Chuẩn bị câu truy vấn SQL
+    $sql = "
+        SELECT 
+            p.year,
+            p.name AS te_kytuyensinh,
+            a.id,
+            a.major_id,
+            MAX(a.created_at) AS created_at,
+            MAX(a.score) AS score,
+            MAX(a.teacher_review) AS teacher_review,
+            m.industry_code,
+            m.ten_nganh,
+            MAX(pm.cut_off_score) AS cut_off_score
+        FROM 
+            applications a
+        JOIN 
+            programs p ON a.program_id = p.id
+        JOIN 
+            majors m ON a.major_id = m.id
+        JOIN 
+            program_majors pm ON a.major_id = pm.major_id
+        WHERE 
+            p.year = ? AND a.status = 'approved'
+        GROUP BY 
+            p.year,
+            p.name,
+            a.id,
+            a.major_id,
+            m.industry_code,
+            m.ten_nganh
+        ORDER BY 
+            p.year DESC;
+    ";
+
+    if ($stmt = $conn->prepare($sql)) {
+        $stmt->bind_param('i', $year);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $applications = [];
+        while ($row = $result->fetch_assoc()) {
+            $applications[] = [
+                'id' => $row['id'],
+                'major_id' => $row['major_id'],
+                'year' => $row['year'],
+                'te_kytuyensinh' => $row['te_kytuyensinh'],
+                'created_at' => $row['created_at'],
+                'score' => $row['score'],
+                'teacher_review' => $row['teacher_review'],
+                'industry_code' => $row['industry_code'],
+                'ten_nganh' => $row['ten_nganh'],
+                'cut_off_score' => $row['cut_off_score']
+            ];
+        }
+
+        $stmt->close();
+        return $applications;
+    } else {
+        return null;
+    }
+}
+
+
+
+// đoạn code xử lý điểm
+
+/*
+$subjects = array_keys($scoreData['subjects']); // lấy các khối xét tuyển của user
+//print_r($subjects);
+$subjectsList = implode(', ', $subjects); // Join lại cách nhau dấu ,
+$result_key = sprintf("%s - %s", $block, $subjectsList);
+$cutOffScores = json_decode($application['cut_off_score'], true);
+$diem_trung_tuyen_theo_khoi = $cutOffScores[$result_key] ?? 0;
+$totalScore = array_sum($scoreData['subjects']);
+
+kết quả $totalScore >= $diem_trung_tuyen_theo_khoi
+
+*/
+// hàm xử lý điểm ở score-> điểm người dùng và cut_off_score-> điểm trúng tuyển

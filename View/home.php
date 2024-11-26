@@ -204,7 +204,7 @@
                     if (!isset($_SESSION["user"])): // Đóng dấu ngoặc tròn và bỏ dấu ':' thừa
                     ?>
                 <li class="nav-item dropdown">
-                    <a class="nav-link" href="index.php?act=login">Đăng ký</a>
+                    <a class="nav-link" href="index.php?act=login">Đăng nhập</a>
                 </li>
             <?php
                     endif;
@@ -222,7 +222,9 @@
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-bell fa-fw"></i>
                         <!-- Counter - Alerts -->
-                        <span class="notification-badge"><?php echo $sl_thong_bao; ?></span>
+                        <?php if ($sl_thong_bao > 0): ?>
+                            <span class="notification-badge"><?php echo $sl_thong_bao ?></span>
+                        <?php endif; ?>
                     </a>
                     <!-- Dropdown - Alerts -->
                     <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="alertsDropdown">

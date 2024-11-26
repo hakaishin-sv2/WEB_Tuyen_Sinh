@@ -201,6 +201,8 @@
         <p></p>
         <ul>
             <?php
+            print_r($cutOffScores);
+
             foreach ($cutOffScores as $score) {
                 // Giải mã chuỗi JSON thành mảng
                 $decodedScores = json_decode($score["cut_off_score"], true);

@@ -154,16 +154,16 @@ switch ($act) {
             require_once PATH_VIEW_CLIENT . '404.php';
         }
         break;
-        // case 'khong-phe-duyet-ho-so':
-        //     if (isset($_GET['id_hoso']) && isset($_GET['user_id'])) {
-        //         check_user_session($act);
-        //         check_role_user_session();
-        //         khong_phe_duyet_ho_so($conn, $_GET['id_hoso'], $_GET["user_id"]);
-        //     } else {
-        //         echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
-        //         require_once PATH_VIEW_CLIENT . '404.php';
-        //     }
-        //     break;
+    case 'khong-phe-duyet-ho-so':
+        if (isset($_GET['id_hoso']) && isset($_GET['user_id'])) {
+            check_user_session($act);
+            check_role_user_session();
+            khong_phe_duyet_ho_so($conn, $_GET['id_hoso'], $_GET["user_id"]);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_CLIENT . '404.php';
+        }
+        break;
     case 'test':
         test($conn, $_GET['post-id']);
         break;

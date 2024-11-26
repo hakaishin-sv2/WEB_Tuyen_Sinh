@@ -25,7 +25,8 @@
                 <p><strong>Họ và tên:</strong> <?= htmlspecialchars($_SESSION['user']['full_name']) ?></p>
                 <p><strong>Vai trò:</strong>
                     <?php
-                    $role = (int)$_SESSION['user']['role'];
+                    $role = $_SESSION['user']['role'];
+                    //print_r($_SESSION['user']);
                     switch ($role) {
                         case "student":
                             echo '<span class="badge bg-secondary text-white">User</span>';

@@ -223,38 +223,31 @@
                     switch ($application['status']) {
                         case 'pending':
                             $statusText = 'Đang xét duyệt';
-                            $statusClass = 'text-warning';
+                            $statusClass = 'text-warning font-weight-bold';
                             break;
                         case 'approved':
                             $statusText = 'Đã phê duyệt';
-                            $statusClass = 'text-success';
+                            $statusClass = 'text-success font-weight-bold';
                             break;
                         case 'rejected':
                             $statusText = 'Bị từ chối';
-                            $statusClass = 'text-danger';
+                            $statusClass = 'text-danger font-weight-bold';
                             break;
                         default:
                             $statusText = 'Không xác định';
-                            $statusClass = 'text-muted';
+                            $statusClass = 'text-muted font-weight-bold';
                             break;
                     }
 
                     // Xử lý điểm trúng tuyển
                     // Lấy danh sách môn học từ mảng subjects và chuyển đổi thành xâu để lấy điểm trúng tuyển theo từng khói
-                    $subjects = array_keys($scoreData['subjects']);
-                    $subjectsList = implode(', ', $subjects);
+                    $subjects = array_keys($scoreData['subjects']); // lấy các khối xét tuyển của user
+                    //print_r($subjects);
+                    $subjectsList = implode(', ', $subjects); // Join lại cách nhau dấu ,
                     $result_key = sprintf("%s - %s", $block, $subjectsList);
-
                     $cutOffScores = json_decode($application['cut_off_score'], true);
                     $diem_trung_tuyen_theo_khoi = $cutOffScores[$result_key] ?? 0;
-                    // echo "<br>";
-                    // echo $diem_trung_tuyen_theo_khoi;
-                    // echo "<br>";
-                    // print_r($cutOffScores);
-                    // echo "<br>";
-                    // Tính tổng điểm của 3 môn
                     $totalScore = array_sum($scoreData['subjects']);
-
                     // Kiểm tra nếu không có dữ liệu điểm
                     if ($diem_trung_tuyen_theo_khoi == 0) {
                         $resultClass = 'btn-primary';

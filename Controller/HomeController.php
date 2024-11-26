@@ -48,7 +48,7 @@ function nop_ho_so($conn, $id_nganh_nop)
                 // check đã nộp hồ sơ chưa
                 $check = hasSubmittedApplication($_SESSION["user"]["id"], $item[0]["id"], $item[0]["major_id"], $conn);
                 if ($check === true) {
-                    $errors[] = "Bạn đã nộp hồ sơ cho ngành ngành rồi!Hãy vào hồ sơ cá nhân để chỉnh sửa";;
+                    $errors[] = "Bạn đã nộp hồ sơ cho ngành này rồi! Hãy vào <a href='index.php?act=list-nop-ho-so-ca-nhan' style='color: blue;'>hồ sơ cá nhân</a> để chỉnh sửa.";
                     $_SESSION['errors'] = $errors;
                     $data_err = [
                         'phone' => $phone,

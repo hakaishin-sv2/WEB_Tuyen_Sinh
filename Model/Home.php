@@ -209,10 +209,10 @@ function get_item_nganh($conn, $id)
 }
 function get_diem_trung_tuyen_3_nam_gan_nhat($conn, $id)
 {
-    // Lấy năm hiện tại và trừ đi 1
+
     $currentYear = date("Y") - 1;
 
-    // Chuẩn bị câu truy vấn SQL
+
     $sql = "
         SELECT 
             pm.cut_off_score, 
@@ -228,20 +228,11 @@ function get_diem_trung_tuyen_3_nam_gan_nhat($conn, $id)
             p.year DESC
         LIMIT 3
     ";
-
-    // Sử dụng câu lệnh chuẩn bị để tránh SQL Injection
     $stmt = $conn->prepare($sql);
-
-    // Gán giá trị cho các biến dấu hỏi trong câu truy vấn
     $threeYearsAgo = $currentYear - 2;
     $stmt->bind_param('iii', $id, $threeYearsAgo, $currentYear);
-
-    // Thực thi câu lệnh
     if ($stmt->execute()) {
-        // Lấy kết quả từ câu truy vấn
         $result = $stmt->get_result();
-
-        // Khởi tạo mảng chứa kết quả
         $scores = [];
         while ($row = $result->fetch_assoc()) {
             $scores[] = $row;
@@ -249,11 +240,9 @@ function get_diem_trung_tuyen_3_nam_gan_nhat($conn, $id)
 
         return $scores;
     } else {
-        // In ra lỗi nếu câu truy vấn thất bại
         echo "Lỗi truy vấn: " . $stmt->error;
     }
 
-    // Đóng câu lệnh
     $stmt->close();
 
     return [];

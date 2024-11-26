@@ -107,7 +107,7 @@
                         </td>
                         <td>
                           <a href="index.php?act=thong-ke-tong-quan&year=<?= htmlspecialchars($item["year"]) ?>" class="btn btn-info">Tổng quan</a>
-                          <!-- <a href="index.php?act=thong-ke-cu-the&year=<?= htmlspecialchars($item["year"]) ?>" class="btn btn-secondary">Theo ngành</a> -->
+                          <a href="index.php?act=thong-ke-cu-the&year=<?= htmlspecialchars($item["year"]) ?>" class="btn btn-secondary">Theo ngành</a>
                         </td>
 
                       <?php endforeach; ?>

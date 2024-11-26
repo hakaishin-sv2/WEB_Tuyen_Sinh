@@ -18,6 +18,15 @@ if (!isset($_SESSION["user"]) || empty($_SESSION["user"]) || (isset($_SESSION["u
         exit();
     }
 }
+function check_role_admin_session()
+{
+    if (!isset($_SESSION["user"]) || empty($_SESSION["user"])) {
+        if ($_SESSION["user"]["role"] !== "admin") {
+            header('Location: index.php?act=login');
+            exit();
+        }
+    }
+}
 // tự động update nếu hết hạn xét tuyển đưa status ở bảng program về inactive
 updateExpiredPrograms($conn);
 switch ($act) {
@@ -260,15 +269,41 @@ switch ($act) {
         }
 
         break;
-        // case 'thong-ke-cu-the': // danh cách năm tuyển sinh 
-        //     if (isset($_GET['year'])) {
-        //         thong_ke_ho_so_theo_nam_va_nganh($conn, $_GET['year']);
-        //     } else {
-        //         echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
-        //         require_once PATH_VIEW_ADMIN . '404.php';
-        //     }
+    case 'thong-ke-cu-the': // danh cách năm tuyển sinh 
+        if (isset($_GET['year'])) {
+            thong_ke_ho_so_theo_nam_va_nganh($conn, $_GET['year']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
 
-        //     break;
+        break;
+    case 'author-update': // danh cách năm tuyển sinh 
+        if (isset($_GET['id'])) {
+            danh_sach_da_duyet_by_teacher($conn, $_GET['id']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+        break;
+    case 'chi-tiet-ho-so-role-admin':
+        if (isset($_GET['id_hoso'])) {
+            check_role_admin_session();
+            chitiet_hoso_by_admin($conn, $_GET['id_hoso']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_CLIENT . '404.php';
+        }
+        break;
+    case 'phe-duyet-ho-so-by-admin':
+        if (isset($_GET['id_hoso']) && isset($_GET['user_id'])) {
+            check_role_admin_session();
+            phe_duyet_ho_so_by_admin($conn, $_GET['id_hoso'], $_GET["user_id"]);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_CLIENT . '404.php';
+        }
+        break;
     case 'test':
         TestIndex($conn);
         break;

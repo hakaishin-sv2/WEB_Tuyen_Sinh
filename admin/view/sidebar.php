@@ -93,7 +93,7 @@
             <span>Charts</span></a>
     </li> -->
     <!-- Nav Item - Banner-manager -->
-    <li class="nav-item">
+    <!-- <li class="nav-item">
         <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapsePostsManager" aria-expanded="false" aria-controls="collapsePostsManager">
             <i class="fas fa-file-alt"></i>
 
@@ -103,10 +103,10 @@
             <div class="bg-white py-2 collapse-inner rounded">
                 <h6 class="collapse-header">Banner:</h6>
                 <a class="collapse-item" href="index.php?act=posts">Danh sách banner</a>
-                <!-- <a class="collapse-item" href="index.php?act=post-create">Thêm mới banner</a> -->
+                <a class="collapse-item" href="index.php?act=post-create">Thêm mới banner</a>
             </div>
         </div>
-    </li>
+    </li> -->
 
     <!-- Nav Item - Tuyển sinh -->
     <li class="nav-item">
