@@ -207,7 +207,8 @@ switch ($act) {
         }
         break;
     case 'update-tuyen-sinh': // update lại các ngành tuyển sinh
-        mo_cong_tuyen_sinh_one_create($conn);
+
+        update_cong_tuyen_sinh($conn, $_GET["year"]);
         break;
     case 'delete-tuyen-sinh':
         if (isset($_GET['year'])) {
@@ -269,9 +270,9 @@ switch ($act) {
         }
 
         break;
-    case 'thong-ke-cu-the': // danh cách năm tuyển sinh 
+    case 'thong-ke-cu-the-theo-nganh': // danh cách năm tuyển sinh 
         if (isset($_GET['year'])) {
-            thong_ke_ho_so_theo_nam_va_nganh($conn, $_GET['year']);
+            thong_ke_ho_so_theo_nam_va_nganh($conn, $_GET['year'], $_GET["id_nganh"]);
         } else {
             echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
             require_once PATH_VIEW_ADMIN . '404.php';
@@ -303,6 +304,41 @@ switch ($act) {
             echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
             require_once PATH_VIEW_CLIENT . '404.php';
         }
+        break;
+    case 'ket-qua-tuyen-sinh':
+        if (isset($_GET['year'])) {
+            thong_ke_ho_so_theo_nam($conn, $_GET['year'], $_GET["type"]);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+
+        break;
+        // case 'khong-trung-tuyen':
+        //     if (isset($_GET['year'])) {
+        //         thong_ke_ho_so_theo_nam_va_nganh($conn, $_GET['year']);
+        //     } else {
+        //         echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+        //         require_once PATH_VIEW_ADMIN . '404.php';
+        //     }
+
+        //     break;
+    case 'thong-he-trang-thai-ho-so':
+        if (isset($_GET['year'])) {
+            thong_ke_ho_so_da_duyet_theo_nam($conn, $_GET["status"], $_GET['year']);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'year' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+        break;
+    case 'xem-lai-ho-so-da-luu':
+        if (isset($_GET['year'])) {
+            xem_lai_ho_so_da_luu($conn, $_GET['year'], $_GET["major_id"], $_GET["status"]);
+        } else {
+            echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
+            require_once PATH_VIEW_ADMIN . '404.php';
+        }
+
         break;
     case 'test':
         TestIndex($conn);

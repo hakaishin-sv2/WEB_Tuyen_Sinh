@@ -280,7 +280,7 @@
 
     <!-- Phần giới thiệu -->
     <section class="container my-5" id="about">
-        <h2 class="section-title">Về Chúng Tôi</h2>
+        <h2 class="section-title">coding by: Nguyễn Trọng Thi</h2>
         <div class="row">
             <div class="col-md-4">
                 <div class="info-card">
@@ -329,7 +329,7 @@
                 <?php foreach ($result as $item): ?>
                     <div class="col-md-6 mb-4">
                         <div class="card" style="cursor: pointer;" onclick="window.location.href='index.php?act=xem-chi-tiet-nganh-tuyen-sinh&id=<?= $item['id'] ?>'">
-                            <img src="<?= $item['img_major'] ?>" class="card-img-top" alt="Chương Trình A" style="height: 200px; object-fit: cover;">
+                            <img src="<?= $item['img_major'] ?>" class="card-img-top" alt="Chương Trình A" style="height: 250px; object-fit: cover;">
                             <div class="card-body">
                                 <h5 class="card-title">Tuyển sinh <?= htmlspecialchars($item['ten_nganh']) . "-" . htmlspecialchars($item['year']) ?> </h5>
                                 <p class="card-text"><?= htmlspecialchars($item['description']) ?></p>

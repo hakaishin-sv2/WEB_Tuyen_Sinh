@@ -82,6 +82,7 @@ function getProgramDetails_byYear($conn, $year)
                 p.year,
                 pm.id AS id_program_major,  
                 pm.status as status_cua_nganh,
+                 m.id as major_id,
                 m.industry_code, 
                 m.ten_nganh AS ten_nganh,  
                 GROUP_CONCAT(CONCAT(eb.code, ' - ', eb.name) SEPARATOR ' + ') AS khoivatohopxet,  -- Khối xét tuyển
@@ -245,6 +246,7 @@ function getApplicationsStatisticsByMajor($conn, $year)
     // Câu truy vấn SQL với ORDER BY số lượng hồ sơ đã duyệt giảm dần
     $sql = "
         SELECT 
+            m.id as major_id,
             m.industry_code,
             m.ten_nganh,
             SUM(CASE WHEN a.status = 'pending' THEN 1 ELSE 0 END) AS total_pending,
@@ -256,23 +258,23 @@ function getApplicationsStatisticsByMajor($conn, $year)
         LEFT JOIN applications a ON a.program_id = p.id AND a.major_id = m.id
         WHERE p.year = ?
         GROUP BY m.industry_code, m.ten_nganh
-        ORDER BY total_approved DESC;
+        ORDER BY total_approved DESC;  -- Sắp xếp theo số lượng đã duyệt giảm dần
     ";
+
+
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $year);
     $stmt->execute();
     $result = $stmt->get_result();
-
     $statistics = [];
     while ($row = $result->fetch_assoc()) {
         $statistics[] = $row;
     }
-
-    // Đóng câu lệnh
     $stmt->close();
 
     return $statistics;
 }
+
 
 // LẤY DANH SÁCH CÁC HỒ SƠ MÀ GIÁO VIÊN CHƯA DUYỆT HAY ĐÃ DUYỆT
 /*
@@ -310,6 +312,7 @@ function getApplicationsByTeacher($conn, $teacherId)
 {
     $sql = "
         SELECT 
+            p.status AS status_program,
             a.id AS application_id,
             a.score,
             a.status,
@@ -356,10 +359,12 @@ function getApplicationsByTeacher($conn, $teacherId)
     return $applications;
 }
 
+
 function getDetailApplicationById_admin($id_hoso, $conn)
 {
     $sql = "
         SELECT 
+            p.status AS status_program,
             p.year,
             p.name as te_kytuyensinh,
             a.id,
@@ -436,8 +441,8 @@ function get_status_hoso_by_year($conn, $status, $year)
 {
     $sql = "SELECT 
                 a.*, 
-                u.full_name AS applicant_name, 
-                u.email AS applicant_email, 
+                u.full_name AS full_name, 
+                u.email AS email, 
                 m.industry_code, 
                 m.ten_nganh, 
                 r.full_name AS reviewer_name, 
@@ -451,7 +456,7 @@ function get_status_hoso_by_year($conn, $status, $year)
             JOIN 
                 majors m ON a.major_id = m.id
             LEFT JOIN 
-                users r ON a.reviewer_by_id = r.id
+                users r ON a.reviewer_by_id = r.id AND a.reviewer_by_id IS NOT NULL
             WHERE 
                 a.status = ? 
                 AND p.year = ?";
@@ -470,6 +475,37 @@ function get_status_hoso_by_year($conn, $status, $year)
     return $applications;
 }
 
+function getProgramsWithMajors($conn, $year)
+{
+    $sql = "
+        SELECT 
+            p.*, 
+            m.id AS major_id, 
+            m.ten_nganh AS major_name, 
+            IF(pm.major_id IS NOT NULL, 1, 0) AS istrue
+        FROM 
+            programs p
+        LEFT JOIN 
+            program_majors pm ON p.id = pm.program_id
+        LEFT JOIN 
+            majors m ON pm.major_id = m.id
+        WHERE 
+            p.year = ?";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $year);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $data = [];
+    while ($row = $result->fetch_assoc()) {
+        $data[] = $row;
+    }
+
+    $stmt->close();
+    return $data;
+}
+
 
 // Thống kê hồ sơ các ngành đã duyệt theo năm
 // để lấy ra có bao nhiêu hồ sơ trúng tuyển bao hồ sơ bị trượt
@@ -478,6 +514,8 @@ function get_approved_applications_by_year($year, $conn)
     // Chuẩn bị câu truy vấn SQL
     $sql = "
         SELECT 
+            u.full_name,
+            u.email,
             p.year,
             p.name AS te_kytuyensinh,
             a.id,
@@ -490,6 +528,8 @@ function get_approved_applications_by_year($year, $conn)
             MAX(pm.cut_off_score) AS cut_off_score
         FROM 
             applications a
+        JOIN 
+            users u ON a.user_id = u.id
         JOIN 
             programs p ON a.program_id = p.id
         JOIN 
@@ -516,6 +556,8 @@ function get_approved_applications_by_year($year, $conn)
         $applications = [];
         while ($row = $result->fetch_assoc()) {
             $applications[] = [
+                'full_name' => $row["full_name"],
+                'email' => $row["email"],
                 'id' => $row['id'],
                 'major_id' => $row['major_id'],
                 'year' => $row['year'],
@@ -553,3 +595,137 @@ kết quả $totalScore >= $diem_trung_tuyen_theo_khoi
 
 */
 // hàm xử lý điểm ở score-> điểm người dùng và cut_off_score-> điểm trúng tuyển
+
+
+
+// Hàm lấy ra hồ sơ của từng ngành khi đã bị khóa các năm nào bị khóa rồi sẽ xem được các hồ sơ trong năm đó
+function get_all_status_hoso_by_year_and_major($conn, $year, $major_id)
+{
+    $sql = "SELECT 
+                a.*, 
+                u.full_name AS full_name, 
+                u.email AS email, 
+                m.industry_code, 
+                m.ten_nganh, 
+                r.full_name AS reviewer_name, 
+                r.email AS reviewer_email
+            FROM 
+                applications a
+            JOIN 
+                programs p ON p.id = a.program_id
+            JOIN 
+                users u ON a.user_id = u.id
+            JOIN 
+                majors m ON a.major_id = m.id
+            LEFT JOIN 
+                users r ON a.reviewer_by_id = r.id AND a.reviewer_by_id IS NOT NULL
+            WHERE 
+                p.year = ? 
+                AND a.major_id = ?";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("ii", $year, $major_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $applications = [];
+    while ($row = $result->fetch_assoc()) {
+        $applications[] = $row;
+    }
+
+    $stmt->close();
+    return $applications;
+}
+
+
+function get_detail__status_hoso_by_year_and_major($conn, $status, $year, $major_id)
+{
+    $sql = "SELECT 
+                a.*, 
+                u.full_name AS full_name, 
+                u.email AS email, 
+                m.industry_code, 
+                m.ten_nganh, 
+                r.full_name AS reviewer_name, 
+                r.email AS reviewer_email
+            FROM 
+                applications a
+            JOIN 
+                programs p ON p.id = a.program_id
+            JOIN 
+                users u ON a.user_id = u.id
+            JOIN 
+                majors m ON a.major_id = m.id
+            LEFT JOIN 
+                users r ON a.reviewer_by_id = r.id AND a.reviewer_by_id IS NOT NULL
+            WHERE 
+                a.status = ? 
+                AND p.year = ? 
+                AND a.major_id = ?";
+
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sii", $status, $year, $major_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $applications = [];
+    while ($row = $result->fetch_assoc()) {
+        $applications[] = $row;
+    }
+
+    $stmt->close();
+    return $applications;
+}
+
+
+// thống kê các hồ sơ theo năm của từng ngành
+
+function thong_ke_ho_so_theo_nam_va_theo_nganh($conn, $year, $id_nganh)
+{
+    $sql = "
+        SELECT 
+            p.status AS status_program,
+            a.id AS application_id,
+            a.score,
+            a.status,
+            a.created_at,
+            a.reviewer_by_id,
+            p.name AS program_name,
+            m.industry_code,
+            m.ten_nganh,
+            u.full_name AS reviewer_name,
+            u.email AS reviewer_email,
+            applicant.full_name AS applicant_name,
+            applicant.email AS applicant_email
+        FROM 
+            applications a
+         JOIN 
+            programs p ON a.program_id = p.id
+         JOIN 
+            majors m ON a.major_id = m.id
+         JOIN 
+            users u ON a.reviewer_by_id = u.id
+         JOIN 
+            users applicant ON a.user_id = applicant.id
+        WHERE 
+            YEAR(a.created_at) = ? 
+            AND a.major_id = ?;
+    ";
+
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        die("Lỗi chuẩn bị truy vấn: " . $conn->error);
+    }
+
+    $stmt->bind_param("ii", $year, $id_nganh);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $applications = [];
+    while ($row = $result->fetch_assoc()) {
+        $applications[] = $row;
+    }
+
+    $stmt->close();
+    return $applications;
+}

@@ -107,7 +107,9 @@
                         </td>
                         <td>
                           <a href="index.php?act=thong-ke-tong-quan&year=<?= htmlspecialchars($item["year"]) ?>" class="btn btn-info">Tổng quan</a>
-                          <a href="index.php?act=thong-ke-cu-the&year=<?= htmlspecialchars($item["year"]) ?>" class="btn btn-secondary">Theo ngành</a>
+                          <!-- <a href="index.php?act=thong-ke-cu-the&year=<?= htmlspecialchars($item["year"]) ?>" class="btn btn-secondary">Theo ngành</a> -->
+                          <a href="index.php?act=ket-qua-tuyen-sinh&year=<?= htmlspecialchars($item["year"]) ?>&type=all" class="btn btn-success">Kết quả tuyển sinh</a>
+                          <!-- <a href="index.php?act=khong-trung-tuyen&year=<?= htmlspecialchars($item["year"]) ?>" class="btn btn-primary">Hồ sơ bị trượt</a> -->
                         </td>
 
                       <?php endforeach; ?>

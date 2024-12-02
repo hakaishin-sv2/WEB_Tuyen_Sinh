@@ -119,16 +119,20 @@
                           <?php
                           // Hiển thị trạng thái với màu sắc
                           if ($item["status"] == "pending") {
-                            echo '<span class="badge bg-primary">Pending</span>';
+                            echo '<span class="badge bg-primary text-white">Pending</span>';
                           } elseif ($item["status"] == "approved") {
-                            echo '<span class="badge bg-success">Approved</span>';
+                            echo '<span class="badge bg-success text-white">Approved</span>';
                           } elseif ($item["status"] == "rejected") {
-                            echo '<span class="badge bg-danger">Rejected</span>';
+                            echo '<span class="badge bg-danger text-white">Rejected</span>';
                           }
                           ?>
                         </td>
                         <td>
-                          <a href="index.php?act=chi-tiet-ho-so-role-admin&id_hoso=<?= htmlspecialchars($item["application_id"]) ?>" class="btn btn-info">Chi tiết hồ sơ</a>
+                          <?php if (trim($item["status_program"]) !== "inactive"): ?>
+                            <a href="index.php?act=chi-tiet-ho-so-role-teacher&id_hoso=<?= $item['application_id']; ?>" class="btn btn-info btn-sm">Xem chi tiết</a>
+                          <?php else: ?>
+                            <span style="color: red; font-style: italic;">Đã khóa</span>
+                          <?php endif; ?>
                         </td>
                       </tr>
                     <?php endforeach; ?>

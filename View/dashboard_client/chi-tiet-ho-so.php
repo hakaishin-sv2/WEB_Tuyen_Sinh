@@ -48,8 +48,10 @@
         <div class="row">
             <div class="col-md-6">
                 <a href="index.php?act=list-nop-ho-so-chua-duyet" class="btn btn-primary">Quay lại</a>
-                <a href="index.php?act=phe-duyet-ho-so&id_hoso=<?= $application["id"] ?>&user_id=<?= $application["user_id"] ?>" class="btn btn-success" onclick="return confirm('Bạn sẽ duyệt hồ sơ này?')">Phê duyệt</a>
-                <a href="index.php?act=khong-phe-duyet-ho-so&id_hoso=<?= $application["id"] ?>&user_id=<?= $application["user_id"] ?>" class="btn btn-danger" id="khongduyet">Không duyệt</a>
+                <?php if ($application["status_progmram"] !== "inactive"): ?>
+                    <a href="index.php?act=phe-duyet-ho-so&id_hoso=<?= $application["id"] ?>&user_id=<?= $application["user_id"] ?>" class="btn btn-success" onclick="return confirm('Bạn sẽ duyệt hồ sơ này?')">Phê duyệt</a>
+                    <a href="index.php?act=khong-phe-duyet-ho-so&id_hoso=<?= $application["id"] ?>&user_id=<?= $application["user_id"] ?>" class="btn btn-danger" id="khongduyet">Không duyệt</a>
+                <?php endif; ?>
                 <div id="khongDuyetForm" style="display: none; margin-top: 10px;">
                     <form action="" method="POST">
                         <textarea id="reason" name="reason" class="form-control" rows="4" placeholder="Nhập lý do không duyệt"></textarea>
@@ -58,7 +60,7 @@
                 </div>
                 <div class="card mb-3">
                     <div class="card-body">
-                        <?php //($application)
+                        <?php //print_r($application)
                         ?>
                         <h5 class="card-title">Thông Tin Hồ Sơ</h5>
                         <p><strong>Năm:</strong> <?php echo htmlspecialchars($application['year']); ?></p>
@@ -148,8 +150,10 @@
             </div>
         </div>
         <a href="index.php?act=list-nop-ho-so-chua-duyet" class="btn btn-primary">Quay lại</a>
-        <a href="index.php?act=phe-duyet-ho-so" class="btn btn-success" onclick="return confirm('Bạn sẽ duyệt hồ sơ này?')">Phê duyệt</a>
-        <a href="index.php?act=list-nop-ho-so-chua-duyet" class="btn btn-danger" id="khongduyet">Không duyệt</a>
+        <?php if ($application["status_progmram"] !== "inactive"): ?>
+            <a href="index.php?act=phe-duyet-ho-so&id_hoso=<?= $application["id"] ?>&user_id=<?= $application["user_id"] ?>" class="btn btn-success" onclick="return confirm('Bạn sẽ duyệt hồ sơ này?')">Phê duyệt</a>
+            <a href="index.php?act=khong-phe-duyet-ho-so&id_hoso=<?= $application["id"] ?>&user_id=<?= $application["user_id"] ?>" class="btn btn-danger" id="khongduyet">Không duyệt</a>
+        <?php endif; ?>
     </div>
 
     <!-- Bootstrap JS and dependencies -->

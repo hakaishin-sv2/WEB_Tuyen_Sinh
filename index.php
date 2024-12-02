@@ -104,7 +104,7 @@ switch ($act) {
     case 'xoa-ho-so-ca-nhan':
         if (isset($_GET['id_hoso'])) {
             check_user_session($act);
-            //detete_ho_so_ca_nhan($conn, $_GET['id_hoso']);
+            detete_ho_so_ca_nhan($conn, $_GET['id_hoso']);
         } else {
             echo "Không có thông tin chi tiết vì thiếu tham số 'id' trong URL.";
             require_once PATH_VIEW_CLIENT . '404.php';

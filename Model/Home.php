@@ -359,6 +359,7 @@ function getDetailApplicationById($id_hoso, $conn)
 {
     $sql = "
         SELECT 
+            p.status AS status_progmram,
             p.year,
             p.name as te_kytuyensinh,
             a.id,

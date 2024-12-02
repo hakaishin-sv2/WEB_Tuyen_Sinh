@@ -3,6 +3,7 @@ function getPendingApplicationsByTeacher($conn, $user_id)
 {
     $sql = "
         SELECT 
+            p.status AS status_program,
             a.id AS application_id,
             a.major_id,
             a.created_at,
@@ -18,6 +19,8 @@ function getPendingApplicationsByTeacher($conn, $user_id)
             teacher_assignment ta
         JOIN 
             applications a ON ta.major_id = a.major_id
+        JOIN
+            programs p ON a.program_id = p.id
         JOIN 
             majors m ON a.major_id = m.id
         JOIN 
@@ -57,6 +60,7 @@ function getApprovedApplicationsByTeacher($conn, $user_id)
 {
     $sql = "
         SELECT 
+            p.status AS status_program,
             a.id AS application_id,
             a.major_id,
             a.created_at,
@@ -72,6 +76,8 @@ function getApprovedApplicationsByTeacher($conn, $user_id)
             teacher_assignment ta
         JOIN 
             applications a ON ta.major_id = a.major_id
+        JOIN
+            programs p ON a.program_id = p.id
         JOIN 
             majors m ON a.major_id = m.id
         JOIN 
@@ -110,6 +116,7 @@ function getRejectedApplicationsByTeacher($conn, $user_id)
 {
     $sql = "
         SELECT 
+            p.status AS status_program,
             a.id AS application_id,
             a.major_id,
             a.created_at,
@@ -125,6 +132,8 @@ function getRejectedApplicationsByTeacher($conn, $user_id)
             teacher_assignment ta
         JOIN 
             applications a ON ta.major_id = a.major_id
+        JOIN
+            programs p ON a.program_id = p.id  
         JOIN 
             majors m ON a.major_id = m.id
         JOIN 

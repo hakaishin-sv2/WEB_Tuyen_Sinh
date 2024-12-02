@@ -24,7 +24,7 @@
 
         <!-- Tổng quan các hồ sơ -->
         <div class="row text-center mb-4">
-            <a href="index.php?act=pending&year=<?= $year ?>" class="col-md-4 text-decoration-none">
+            <a href="index.php?act=thong-he-trang-thai-ho-so&status=pending&year=<?= $year ?>" class="col-md-4 text-decoration-none">
                 <div class="card bg-warning text-white">
                     <div class="card-body">
                         <h5 class="card-title">Hồ sơ chờ duyệt</h5>
@@ -32,7 +32,7 @@
                     </div>
                 </div>
             </a>
-            <a href="index.php?act=approved&year=<?= $year ?>" class="col-md-4 text-decoration-none">
+            <a href="index.php?act=thong-he-trang-thai-ho-so&status=approved&year=<?= $year ?>" class="col-md-4 text-decoration-none">
                 <div class="card bg-success text-white">
                     <div class="card-body">
                         <h5 class="card-title">Hồ sơ đã duyệt</h5>
@@ -40,7 +40,7 @@
                     </div>
                 </div>
             </a>
-            <a href="index.php?act=rejected&year=<?= $year ?>" class="col-md-4 text-decoration-none">
+            <a href="index.php?act=thong-he-trang-thai-ho-so&status=rejected&year=<?= $year ?>" class="col-md-4 text-decoration-none">
                 <div class="card bg-danger text-white">
                     <div class="card-body">
                         <h5 class="card-title">Hồ sơ bị từ chối</h5>
@@ -54,6 +54,10 @@
         <!-- Thống kê theo ngành -->
         <h3 class="mb-3">Thống kê theo ngành</h3>
         <div class="table-responsive">
+            <?php
+            //print_r($statistics)
+
+            ?>
             <table id="table" class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
@@ -62,6 +66,7 @@
                         <th>Hồ sơ chờ duyệt</th>
                         <th>Hồ sơ đã duyệt</th>
                         <th>Hồ sơ bị từ chối</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -73,6 +78,9 @@
                                 <td><?= htmlspecialchars($stat['total_pending']); ?></td>
                                 <td><?= htmlspecialchars($stat['total_approved']); ?></td>
                                 <td><?= htmlspecialchars($stat['total_rejected']); ?></td>
+                                <td>
+                                    <a href="index.php?act=thong-ke-cu-the-theo-nganh&id_nganh=<?= $stat['major_id']; ?>&year=<?= $_GET['year']; ?>" class="btn btn-info">Chi tiết</a>
+                                </td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
@@ -90,6 +98,10 @@
     <script>
         $(document).ready(function() {
             $('#table').DataTable({
+                "ordering": true, // Bật tính năng sắp xếp
+                "order": [
+                    [4, 'desc']
+                ],
                 "language": {
                     "lengthMenu": "Hiển thị _MENU_ dòng mỗi trang",
                     "zeroRecords": "Không tìm thấy kết quả",

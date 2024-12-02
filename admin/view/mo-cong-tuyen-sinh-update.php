@@ -81,29 +81,24 @@
 
               <div class="container mt-5">
                 <h2> </h2>
+                <?php
+                //print_r($getProgramsWithMajors)
+                ?>
                 <form action="" method="post" enctype="multipart/form-data">
                   <div class="form-group">
                     <label for="program_name">Tên chương trình</label>
                     <input readonly type="text" class="form-control" id="program_name" name="program_name" required
-                      value="<?= isset($_SESSION['data_err']['program_name']) ? htmlspecialchars($_SESSION['data_err']['program_name']) : 'Tuyển sinh đại học -' . date('Y') ?>">
+                      value="<?= htmlspecialchars($data[0]['name']) ?>">
                   </div>
                   <div class="form-group">
                     <label for="start_date">Ngày bắt đầu</label>
-                    <input type="date" class="form-control" id="start_date" name="start_date" onchange="calculateEndDate()" required>
+                    <input type="date" class="form-control" id="start_date" name="start_date"
+                      value="<?= htmlspecialchars($data[0]['start_date']) ?>" required>
                   </div>
                   <div class="form-group">
-                    <label for="duration">Thời gian xét tuyển (tháng)</label>
-                    <select class="form-control" id="duration" name="duration" onchange="calculateEndDate()" required>
-                      <option value="">Chọn thời gian...</option>
-                      <option value="2">2 tháng</option>
-                      <option value="3">3 tháng</option>
-                      <option value="4">4 tháng</option>
-                      <!-- Thêm các tùy chọn khác nếu cần -->
-                    </select>
-                  </div>
-                  <div class="form-group">
-                    <label for="end_date">Ngày kết thúc</label>
-                    <input type="date" class="form-control" id="end_date" name="end_date" n>
+                    <label for="duration">Ngày kết thúc</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date"
+                      value="<?= htmlspecialchars($data[0]['end_date']) ?>" required>
                   </div>
                   <div class="form-group">
                     <label for="majors">Chọn ngành:</label>
@@ -113,37 +108,29 @@
                         Chọn tất cả
                       </label>
                     </div>
-
                     <br>
                     <div class="row">
-                      <?php foreach ($MajorsList as $major) : ?>
+                      <?php foreach ($data as $item): ?>
                         <div class="col-md-6 mb-3">
                           <div class="form-check">
-                            <input class="form-check-input" type="checkbox" name="majors[]" id="major_<?= htmlspecialchars($major['industry_code']) ?>" value="<?= htmlspecialchars($major['id']) ?>">
-                            <label class="form-check-label" for="major_<?= htmlspecialchars($major['industry_code']) ?>">
-                              <?= htmlspecialchars($major['industry_code']) ?> - <?= htmlspecialchars($major['ten_nganh']) ?>
+                            <input
+                              class="form-check-input"
+                              type="checkbox"
+                              name="majors[]"
+                              id="major_<?= htmlspecialchars($item['major_id']) ?>"
+                              value="<?= htmlspecialchars($item['major_id']) ?>"
+                              <?= $item['istrue'] == 1 ? 'checked' : '' ?>>
+                            <label class="form-check-label" for="major_<?= htmlspecialchars($item['major_id']) ?>">
+                              <?= htmlspecialchars($item['major_name']) ?>
                             </label>
                           </div>
                         </div>
                       <?php endforeach; ?>
                     </div>
                   </div>
-
-                  <!-- <div class="form-group">
-                    <img id="avatar-preview" src="#" alt="Ảnh Avatar" style="max-width: 200px; max-height: 200px; display: none;">
-                  </div>
-                  <div class="form-group">
-                    <label for="avatar">Chọn Ảnh Avatar</label>
-                    <input type="file" class="form-control-file" id="avatar" name="avatar" accept="image/*">
-                    <small class="form-text text-muted">Chọn một file ảnh để làm Avatar.</small>
-                  </div> -->
-                  <!-- <div class="form-group">
-                    <label for="bio">Tiểu Sử</label>
-                    <textarea class="form-control" id="bio" name="bio" rows="3" required></textarea>
-                  </div> -->
-
                   <button type="submit" class="btn btn-primary">Mở cổng xét tuyển</button>
                 </form>
+
               </div>
               <?php unset($_SESSION['data_err']); ?>
             </div>

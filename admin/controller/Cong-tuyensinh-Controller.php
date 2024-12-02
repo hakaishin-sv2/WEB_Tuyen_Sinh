@@ -12,10 +12,23 @@ function thong_ke_ho_so_cac_nam($conn)
     require_once PATH_VIEW_ADMIN . 'thong-ke-hosocacnam.php';
 }
 
-function thong_ke_ho_so_theo_nam_va_nganh($conn, $year)
+function thong_ke_ho_so_theo_nam_va_nganh($conn, $year, $id_nganh)
 {
-    $statistics = getApplicationsStatisticsByMajor($conn, $year);
+    $list = thong_ke_ho_so_theo_nam_va_theo_nganh($conn, $year, $id_nganh);
     require_once PATH_VIEW_ADMIN . 'thong-ke-theo-nganh.php';
+}
+
+function thong_ke_ho_so_da_duyet_theo_nam($conn, $status, $year)
+{
+
+    $list = get_status_hoso_by_year($conn, $status, $year);
+    require_once PATH_VIEW_ADMIN . 'thong-ke-da-phe-duyet.php';
+}
+function thong_ke_ho_so_theo_nam($conn, $year, $type)
+{
+    $check_type = $type;
+    $statistics = get_approved_applications_by_year($year, $conn);
+    require_once PATH_VIEW_ADMIN . 'thong-ke-trung-tuyen.php';
 }
 
 function thong_ke_ho_so_tong_quan($conn, $year)
@@ -29,6 +42,23 @@ function chi_tiet_tuyen_sinh_by_year($conn, $year)
 {
     $list =  getProgramDetails_byYear($conn, $year);
     require_once PATH_VIEW_ADMIN . 'list-cac-nganh-tuyen-sinh-by-year.php';
+}
+
+function xem_lai_ho_so_da_luu($conn, $year, $major_id, $status)
+{
+    if ($status == null || $status == "") {
+        $list =  get_all_status_hoso_by_year_and_major($conn,  $year, $major_id);
+    } elseif ($status === "approved") {
+        $list =  get_detail__status_hoso_by_year_and_major($conn, $status,  $year, $major_id);
+    } elseif ($status === "rejected") {
+        $list =  get_detail__status_hoso_by_year_and_major($conn, $status,  $year, $major_id);
+    } elseif ($status === "pending") {
+        $list =  get_detail__status_hoso_by_year_and_major($conn, $status,  $year, $major_id);
+    } else {
+        $list =  get_all_status_hoso_by_year_and_major($conn,  $year, $major_id);
+    }
+
+    require_once PATH_VIEW_ADMIN . 'xem-lai-ho-so-da-luu.php';
 }
 function mo_cong_tuyen_sinh_one_create($conn)
 {
@@ -118,7 +148,94 @@ function mo_cong_tuyen_sinh_one_create($conn)
 
     require_once PATH_VIEW_ADMIN . 'mo-cong-tuyen-sinh.php';
 }
+function update_cong_tuyen_sinh($conn, $year)
+{
+    $MajorsList = getMajorsList($conn); // Lấy danh sách ngành học
+    $data = getProgramsWithMajors($conn, $year);
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $name = isset($_POST['program_name']) ? mysqli_real_escape_string($conn, $_POST['program_name']) : '';
+        $start_date = isset($_POST['start_date']) ? mysqli_real_escape_string($conn, $_POST['start_date']) : '';
+        $end_date = isset($_POST['end_date']) ? mysqli_real_escape_string($conn, $_POST['end_date']) : '';
+        //$duration = isset($_POST['duration']) ? (int)$_POST['duration'] : 0;
+        $majors = isset($_POST['majors']) ? $_POST['majors'] : [];
+        $errors = [];
+        if (empty($name)) {
+            $errors[] = "Vui lòng nhập tên chương trình.";
+        }
+        if (empty($start_date)) {
+            $errors[] = "Vui lòng chọn ngày bắt đầu.";
+        }
+        if (empty($majors)) {
+            $errors[] = "Vui lòng chọn ít nhất một ngành học.";
+        }
+        // Nếu có lỗi, lưu vào session 
+        if (!empty($errors)) {
+            $_SESSION['errors'] = $errors;
+            $_SESSION['data_err'] = $_POST;
+            header('Location: index.php?act=open-application');
+            exit();
+        }
+        // Dữ liệu để chèn vào bảng programs
+        $currentYear = date('Y');
+        // $currentYear = 2022;
+        $data = [
+            'name' => $name,
+            'start_date' => $start_date,
+            'end_date' => $end_date,
+            'year'  =>  $currentYear,
+        ];
 
+        // Kiểm tra và xóa chương trình hiện có nếu tồn tại cho năm hiện tại
+        // các ngành bổ sung sau sẽ được thêm vào lại
+
+        if (checkProgramExists($conn, $currentYear)) {
+            // Kiểm tra nếu có chương trình nào trong năm hiện tại và trạng thái là 'inactive'
+            $statusCheckSQL = "SELECT * FROM programs WHERE year = ? AND status = 'inactive'";
+            $stmtStatusCheck = mysqli_prepare($conn, $statusCheckSQL);
+            if ($stmtStatusCheck) {
+                mysqli_stmt_bind_param($stmtStatusCheck, 'i', $currentYear);
+                mysqli_stmt_execute($stmtStatusCheck);
+                $statusResult = mysqli_stmt_get_result($stmtStatusCheck);
+                //  'inactive', thêm lỗi vào sesion này $errors
+                if (mysqli_num_rows($statusResult) > 0) {
+                    $errors[] = "Chương trình tuyển sinh của năm này đã bị khóa và không thể mở lại.";
+                    $_SESSION['errors'] = $errors;
+                    $_SESSION['data_err'] = $_POST;
+                    header('Location: index.php?act=open-application');
+                    exit();
+                }
+
+                // Nếu không có chương trình 'inactive', tiếp tục kiểm tra và xóa chương trình 'active'
+                mysqli_stmt_close($stmtStatusCheck);
+            }
+
+            // Xóa các ngành đang tuyển sinh của năm này có status là 'active'
+            $deleteSQL = "DELETE FROM programs WHERE year = ? AND status = 'active'";
+            $stmt = mysqli_prepare($conn, $deleteSQL);
+            if ($stmt) {
+                mysqli_stmt_bind_param($stmt, 'i', $currentYear);
+                mysqli_stmt_execute($stmt);
+                mysqli_stmt_close($stmt);
+            }
+        }
+
+
+        $program_id = insert($conn, "programs", $data);
+        foreach ($majors as $major_id) {
+            $data_major = [
+                'program_id' => $program_id,
+                'major_id' => (int)$major_id
+            ];
+            insert($conn, "program_majors", $data_major);
+        }
+
+        $_SESSION['success'] = "Mở cổng tuyển sinh thành công";
+        header('Location: index.php?act=list-open-majors');
+        exit();
+    }
+
+    require_once PATH_VIEW_ADMIN . 'mo-cong-tuyen-sinh-update.php';
+}
 function close_tuyen_sinh($conn, $year)
 {
     // Cập nhật trạng thái của các chương trình tuyển sinh thành 'inactive' trong bảng programs
@@ -442,11 +559,11 @@ function chitiet_hoso_by_admin($conn, $id_hoso)
 }
 function phe_duyet_ho_so_by_admin($conn, $id_hoso, $user_id)
 {
-    // Bắt đầu transaction
+
     $conn->begin_transaction();
 
     try {
-        // Cập nhật trạng thái của hồ sơ
+
         $data = [
             'status' => "approved",
             'reviewer_by_id' => $_SESSION["user"]["id"],  // Gán ID của người phê duyệt

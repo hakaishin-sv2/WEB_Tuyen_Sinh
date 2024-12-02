@@ -77,7 +77,7 @@
                     <option value="index.php?act=list-ho-so-daduyet">Hồ sơ đã duyệt</option>
                   </select>
                 </div>
-                <?php //print_r($list)  
+                <?php //print_r($list)
                 ?><h3 class="text-success">Hồ sơ đã duyệt</h3>
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                   <thead>
@@ -156,7 +156,11 @@
                           </td>
 
                           <td>
-                            <a href="index.php?act=chi-tiet-ho-so-role-teacher&id_hoso=<?= $application['application_id']; ?>" class="btn btn-info btn-sm">Xem chi tiết</a>
+                            <?php if (trim($application["status_program"]) !== "inactive"): ?>
+                              <a href="index.php?act=chi-tiet-ho-so-role-teacher&id_hoso=<?= $application['application_id']; ?>" class="btn btn-info btn-sm">Xem chi tiết</a>
+                            <?php else: ?>
+                              <span style="color: red; font-style: italic;">Đã khóa</span>
+                            <?php endif; ?>
                           </td>
                         </tr>
                       <?php endforeach; ?>

@@ -158,7 +158,11 @@
                           </td>
 
                           <td>
-                            <a href="index.php?act=chi-tiet-ho-so-role-teacher&id_hoso=<?= $application['application_id']; ?>" class="btn btn-info btn-sm">Xem chi tiết</a>
+                            <?php if (trim($application["status_program"]) !== "inactive"): ?>
+                              <a href="index.php?act=chi-tiet-ho-so-role-teacher&id_hoso=<?= $application['application_id']; ?>" class="btn btn-info btn-sm">Xem chi tiết</a>
+                            <?php else: ?>
+                              <span style="color: red; font-style: italic;">Đã khóa</span>
+                            <?php endif; ?>
                           </td>
                         </tr>
                       <?php endforeach; ?>

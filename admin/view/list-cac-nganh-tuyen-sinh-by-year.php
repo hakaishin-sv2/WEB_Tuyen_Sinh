@@ -66,6 +66,9 @@
                 <?php unset($_SESSION["success"]);  ?>
               <?php endif; ?>
               <div class="table-responsive">
+                <?php
+                // print_r($list)
+                ?>
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
                   <thead>
                     <tr>
@@ -135,6 +138,8 @@
                           <?php if ($item["status"] === 'inactive'): ?>
                             <!-- Nếu chương trình inactive, chỉ hiển thị nút nhập điểm -->
                             <span>Đã khóa rồi</span>
+                            <a href="index.php?act=xem-lai-ho-so-da-luu&major_id=<?= htmlspecialchars($item["major_id"]) ?>&year=<?= htmlspecialchars($item["year"]) ?>&status=" class="btn btn-info">Hồ sơ trong năm</a>
+
                             <!-- <a href="index.php?act=nganh-xet-tuyen-detail&year=<?= htmlspecialchars($item["year"]) ?>" class="btn btn-info">Nhập điểm</a> -->
                           <?php elseif ($item["status"] === 'active'): ?>
                             <!-- Nếu chương trình active, hiển thị tất cả các nút dựa trên trạng thái của ngành -->
